@@ -207,3 +207,38 @@ function scheduleBlocks(entries) {
   });
   return out;
 }
+
+// The in-progress selection also travels in the URL (?course=CHEMF111&sec=L1,T1).
+// Relying on localStorage alone meant that whenever storage wasn't shared across
+// a navigation -- pages opened over file://, site data blocked, strict privacy
+// modes -- the selection silently vanished and the user was bounced back to the
+// requirements page. URL params always survive a navigation, so they are the
+// source of truth; localStorage is kept in sync as a convenience.
+function pendingQuery(pending) {
+  var c = COURSES[pending.courseId];
+  var ids = c.components.map(function (comp) {
+    var s = pending.sections[comp.type];
+    if (!s) return '';
+    return typeof s === 'string' ? s : s.id;
+  });
+  return 'course=' + encodeURIComponent(pending.courseId) +
+         '&sec=' + encodeURIComponent(ids.join(','));
+}
+
+function readPending() {
+  var p = new URLSearchParams(location.search);
+  var courseId = p.get('course');
+  var secs = p.get('sec');
+  if (courseId && secs && COURSES[courseId]) {
+    var ids = secs.split(',');
+    var out = { courseId: courseId, sections: {} };
+    COURSES[courseId].components.forEach(function (comp, i) {
+      if (ids[i]) out.sections[comp.type] = ids[i];
+    });
+    if (Object.keys(out.sections).length) {
+      savePending(out);
+      return out;
+    }
+  }
+  return getPending();
+}

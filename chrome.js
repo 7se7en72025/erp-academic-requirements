@@ -6,7 +6,7 @@
 // Pages' CDN) will happily serve a stale copy of a plain .html URL with no
 // query string, so the same fixed marker is appended everywhere pages link
 // to each other. Bump it whenever chrome.js/data.js/chrome.css change.
-var CACHE_BUST = '_c=2';
+var CACHE_BUST = '_c=4';
 
 var SIDEBAR_ITEMS = [
   { key: 'view-my-classes',       label: 'View My Classes',          href: 'weekly-schedule.html?' + CACHE_BUST },
