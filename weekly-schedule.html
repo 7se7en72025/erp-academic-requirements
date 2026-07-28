@@ -11,68 +11,116 @@
 <script src="data.js"></script>
 <script src="chrome.js"></script>
 <script>
-renderChrome({ active: 'view-my-classes', pageName: 'My Weekly Schedule' });
+renderChrome({ active: 'view-my-classes', pageName: 'Registration' });
 
-var COMP_NAME = { L: 'Lecture', T: 'Tutorial', P: 'Lab' };
-var DAY_CODES = { Mo: 'Monday', Tu: 'Tuesday', We: 'Wednesday', Th: 'Thursday', Fr: 'Friday', Sa: 'Saturday', Su: 'Sunday' };
+var DAY_NAMES = { Mo: 'Monday', Tu: 'Tuesday', We: 'Wednesday', Th: 'Thursday',
+                  Fr: 'Friday', Sa: 'Saturday', Su: 'Sunday' };
 var DAY_ORDER = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 var HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-function parseDays(str) {
-  var out = [];
-  for (var i = 0; i < str.length; i += 2) out.push(str.substr(i, 2));
-  return out;
-}
-function parseStartHour(timeStr) {
-  var m = timeStr.match(/^(\d+):(\d+)(AM|PM)/);
-  if (!m) return null;
-  var h = parseInt(m[1], 10);
-  if (m[3] === 'PM' && h !== 12) h += 12;
-  if (m[3] === 'AM' && h === 12) h = 0;
-  return h;
-}
-
+var weekOffset = 0;           // 0 = the first teaching week of the term
+var view = 'week';            // 'week' | 'list'
 var enrolled = getEnrolled();
-var cells = {}; // "day-hour" -> array of labels
+var blocks = scheduleBlocks(enrolled);
 
-enrolled.forEach(function (entry) {
-  var course = COURSES[entry.courseId];
-  Object.keys(entry.sections).forEach(function (type) {
-    var s = entry.sections[type];
-    var startHour = parseStartHour(s.time.split('-')[0].trim());
-    parseDays(s.days).forEach(function (d) {
-      var key = d + '-' + startHour;
-      cells[key] = cells[key] || [];
-      cells[key].push(course.code + ' - ' + s.id + ' ' + COMP_NAME[type] + '<br>' + s.time + '<br>Room: ' + s.room);
+function fmt(d) { return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
+
+function weekStart() {
+  var d = new Date(2026, 7, 3);            // Mon 03/08/2026, first teaching Monday
+  d.setDate(d.getDate() + weekOffset * 7);
+  return d;
+}
+
+function calendar() {
+  var start = weekStart();
+  var head = '<tr><th>Time</th>' + DAY_ORDER.map(function (code, i) {
+    var d = new Date(start); d.setDate(d.getDate() + i);
+    return '<th>' + DAY_NAMES[code] + '<br>' + d.getDate() + ' ' + MONTHS[d.getMonth()] + '</th>';
+  }).join('') + '</tr>';
+
+  var body = HOURS.map(function (h) {
+    var label = (h % 12 === 0 ? 12 : h % 12) + ':00' + (h < 12 ? 'AM' : 'PM');
+    return '<tr><td class="timecell">' + label + '</td>' + DAY_ORDER.map(function (code) {
+      var hit = blocks.filter(function (b) { return b.day === code && h >= b.start && h < b.end; });
+      if (!hit.length) return '<td class="empty"></td>';
+      return '<td class="ev">' + hit.map(function (b) {
+        return b.code + ' - ' + b.sec.id + '<br>' + COMP_NAME[b.comp] + '<br>' +
+          b.sec.time + '<br>Location: ' + b.sec.room;
+      }).join('<hr>') + '</td>';
+    }).join('') + '</tr>';
+  }).join('');
+
+  return '<div class="grid-scroll"><table class="cal"><thead>' + head +
+    '</thead><tbody>' + body + '</tbody></table></div>';
+}
+
+function listView() {
+  var rows = '';
+  enrolled.forEach(function (e) {
+    var c = COURSES[e.courseId];
+    c.components.forEach(function (comp) {
+      var s = e.sections[comp.type];
+      if (typeof s === 'string') s = c.sections[comp.type].find(function (x) { return x.id === s; });
+      if (!s) return;
+      rows += '<tr><td>' + c.code + '-' + s.id + '<br>(' + s.nbr + ')</td>' +
+        '<td>' + c.name + '</td><td>' + COMP_NAME[comp.type] + '</td>' +
+        '<td>' + s.days + ' ' + s.time + '</td><td>' + s.room + '</td>' +
+        '<td>' + s.instructor + '</td></tr>';
     });
   });
-});
+  return '<div class="grid-scroll"><table class="data"><thead><tr><th>Class</th>' +
+    '<th>Description</th><th>Component</th><th>Days/Times</th><th>Room</th>' +
+    '<th>Instructor</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
 
-var head = '<tr><th>Time</th>' + DAY_ORDER.map(function (d) { return '<th>' + DAY_CODES[d] + '</th>'; }).join('') + '</tr>';
-var body = HOURS.map(function (h) {
-  var label = (h % 12 === 0 ? 12 : h % 12) + ':00' + (h < 12 ? 'AM' : 'PM');
-  var row = '<tr><td>' + label + '</td>';
-  DAY_ORDER.forEach(function (d) {
-    var key = d + '-' + h;
-    if (cells[key]) {
-      row += '<td class="busy">' + cells[key].join('<hr>') + '</td>';
-    } else {
-      row += '<td class="slot"></td>';
-    }
-  });
-  row += '</tr>';
-  return row;
-}).join('');
+function render() {
+  var start = weekStart();
+  var end = new Date(start); end.setDate(end.getDate() + 6);
 
-document.getElementById('main-content').innerHTML =
-  idRowHtml() + tabsHtml('Enroll') +
-  '<h1 class="page-title">My Weekly Schedule</h1>' +
-  '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +
-  (enrolled.length === 0
-    ? '<p style="color:#666;">You are not registered for classes in this term. <a href="academic-requirements.html">Go register</a>.</p>'
-    : '<div class="panel"><div class="panel-title">Schedule</div><div class="grid-scroll">' +
-      '<table class="data weekly-grid"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>' +
-      '</div></div>');
+  var body;
+  if (!enrolled.length) {
+    body = '<p style="margin-left:8px;">You are not registered for classes in this term. ' +
+      '<a href="academic-requirements.html">Go register</a>.</p>';
+  } else if (view === 'list') {
+    body = '<div class="req-sub">Schedule</div>' + listView();
+  } else {
+    body =
+      '<div class="weeknav">' +
+        '<button class="ps-btn" onclick="shiftWeek(-1)">&lt;&lt; Previous Week</button>' +
+        '<span class="weeklabel">Week of ' + fmt(start) + ' - ' + fmt(end) + '</span>' +
+        '<button class="ps-btn" onclick="shiftWeek(1)">Next Week &gt;&gt;</button>' +
+      '</div>' +
+      '<div class="panel"><div class="panel-body">' +
+        '<strong>Show Week of</strong> <input type="text" size="10" value="' + fmt(start) + '" readonly> ' +
+        '&nbsp;<strong>Start Time</strong> <input type="text" size="7" value="8:00AM" readonly> ' +
+        '&nbsp;<strong>End Time</strong> <input type="text" size="7" value="6:00PM" readonly> ' +
+        '&nbsp;<button class="ps-btn slim" onclick="render()">Refresh Calendar</button>' +
+      '</div></div>' +
+      '<div class="req-sub">Schedule</div>' + calendar();
+  }
+
+  document.getElementById('main-content').innerHTML =
+    idRowHtml() + tabsHtml('Enroll') +
+    '<div class="subnav"><span class="current">My Class Schedule</span>' +
+      '<span class="sep">|</span><a href="academic-requirements.html">Add</a>' +
+      '<span class="sep">|</span><a href="#">Swap</a>' +
+      '<span class="sep">|</span><a href="#">Term Information</a></div>' +
+    '<h1 class="page-title">My Class Schedule</h1>' +
+    '<div class="optrow"><strong>Select Display Option</strong>' +
+      '<label><input type="radio" name="disp" ' + (view === 'list' ? 'checked' : '') +
+        ' onchange="setView(\'list\')"> List View</label>' +
+      '<label><input type="radio" name="disp" ' + (view === 'week' ? 'checked' : '') +
+        ' onchange="setView(\'week\')"> Weekly Calendar View</label>' +
+    '</div>' +
+    body +
+    '<p class="go-top"><a href="#">Go to top</a></p>';
+}
+
+function setView(v) { view = v; render(); }
+function shiftWeek(n) { weekOffset += n; render(); }
+
+render();
 </script>
 </body>
 </html>

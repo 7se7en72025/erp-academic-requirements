@@ -14,7 +14,7 @@ var TERM = 'FIRST SEMESTER 2026-2027';
 var COURSES = {
   'CHEMF110': {
     code: 'CHEM F110', name: 'CHEMISTRY LABORATORY', units: 1,
-    dept: 'Dept of Chemistry', components: [{ type: 'P', required: true }],
+    dept: 'Dept of Chemistry', acadGroup: 'Science', components: [{ type: 'P', required: true }],
     sections: {
       P: [
         { id: 'P1', nbr: 1844, days: 'Tu', time: '2:00PM - 4:50PM', room: 'Chem Lab 1', instructor: 'LIONEL MESSI', exam: '', fnan: 'AN', status: 'open' },
@@ -24,7 +24,7 @@ var COURSES = {
   },
   'CHEMF111': {
     code: 'CHEM F111', name: 'GENERAL CHEMISTRY', units: 3,
-    dept: 'Dept of Chemistry', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
+    dept: 'Dept of Chemistry', acadGroup: 'Science', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
     sections: {
       L: [
         { id: 'L1', nbr: 1855, days: 'MoWeFr', time: '9:00AM - 9:50AM', room: 'LT-1', instructor: 'ANDRES INIESTA', exam: '21/12/2026', fnan: 'FN', status: 'open' },
@@ -38,21 +38,21 @@ var COURSES = {
   },
   'EEEF111': {
     code: 'EEE F111', name: 'ELECTRICAL SCIENCES', units: 3,
-    dept: 'Dept of Electrical & Elec Engg', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
+    dept: 'Dept of Electrical & Elec Engg', acadGroup: 'Engineering', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
     sections: {
       L: [
         { id: 'L1', nbr: 1877, days: 'TuThSa', time: '9:00AM - 9:50AM', room: 'LT-3', instructor: 'KEVIN DE BRUYNE', exam: '14/12/2026', fnan: 'AN', status: 'open' },
         { id: 'L2', nbr: 1878, days: 'TuThSa', time: '11:00AM - 11:50AM', room: 'LT-4', instructor: 'ERLING HAALAND', exam: '14/12/2026', fnan: 'AN', status: 'closed' }
       ],
       T: [
-        { id: 'T1', nbr: 1885, days: 'Mo', time: '4:00PM - 4:50PM', room: 'Room 105', instructor: 'PHIL FODEN', exam: '', fnan: '', status: 'open' },
+        { id: 'T1', nbr: 1885, days: 'Mo', time: '1:00PM - 1:50PM', room: 'Room 105', instructor: 'PHIL FODEN', exam: '', fnan: '', status: 'open' },
         { id: 'T2', nbr: 1886, days: 'Tu', time: '4:00PM - 4:50PM', room: 'Room 106', instructor: 'RODRI HERNANDEZ', exam: '', fnan: '', status: 'closed' }
       ]
     }
   },
   'MATHF111': {
     code: 'MATH F111', name: 'MATHEMATICS I', units: 3,
-    dept: 'Dept of Mathematics', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
+    dept: 'Dept of Mathematics', acadGroup: 'Science', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
     sections: {
       L: [
         { id: 'L1', nbr: 1901, days: 'MoWeFr', time: '8:00AM - 8:50AM', room: 'LT-5', instructor: 'LUKA MODRIC', exam: '07/12/2026', fnan: 'FN', status: 'open' }
@@ -65,13 +65,13 @@ var COURSES = {
   },
   'MEF112': {
     code: 'ME F112', name: 'WORKSHOP PRACTICE', units: 2,
-    dept: 'Dept of Mechanical Engg', components: [{ type: 'L', required: true }, { type: 'P', required: true }],
+    dept: 'Dept of Mechanical Engg', acadGroup: 'Engineering', components: [{ type: 'L', required: true }, { type: 'P', required: true }],
     sections: {
       L: [
         { id: 'L1', nbr: 2730, days: 'Th', time: '8:00AM - 8:50AM', room: 'LT-6', instructor: 'VIRGIL VAN DIJK', exam: '', fnan: '', status: 'open' }
       ],
       P: [
-        { id: 'P1', nbr: 2736, days: 'Fr', time: '9:00AM - 11:50AM', room: 'Workshop 1', instructor: 'MOHAMED SALAH', exam: '', fnan: '', status: 'open' },
+        { id: 'P1', nbr: 2736, days: 'Fr', time: '2:00PM - 4:50PM', room: 'Workshop 1', instructor: 'MOHAMED SALAH', exam: '', fnan: '', status: 'open' },
         { id: 'P2', nbr: 2737, days: 'Tu', time: '12:00PM - 2:50PM', room: 'Workshop 2', instructor: 'TRENT ALEXANDER-ARNOLD', exam: '', fnan: '', status: 'closed' },
         { id: 'P3', nbr: 2738, days: 'Mo', time: '9:00AM - 11:50AM', room: 'Workshop 1', instructor: 'ALISSON BECKER', exam: '', fnan: '', status: 'closed' }
       ]
@@ -79,7 +79,7 @@ var COURSES = {
   },
   'PHYF110': {
     code: 'PHY F110', name: 'PHYSICS LABORATORY', units: 1,
-    dept: 'Dept of Physics', components: [{ type: 'P', required: true }],
+    dept: 'Dept of Physics', acadGroup: 'Science', components: [{ type: 'P', required: true }],
     sections: {
       P: [
         { id: 'P1', nbr: 1920, days: 'Mo', time: '2:00PM - 4:50PM', room: 'Physics Lab 1', instructor: 'NEYMAR JR', exam: '', fnan: 'AN', status: 'open' },
@@ -89,7 +89,7 @@ var COURSES = {
   },
   'PHYF111': {
     code: 'PHY F111', name: 'MECH OSCILLATIONS & WAVE', units: 3,
-    dept: 'Dept of Physics', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
+    dept: 'Dept of Physics', acadGroup: 'Science', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
     sections: {
       L: [
         { id: 'L1', nbr: 1930, days: 'MoWeFr', time: '10:00AM - 10:50AM', room: 'LT-7', instructor: 'ZINEDINE ZIDANE', exam: '10/12/2026', fnan: 'FN', status: 'open' }
@@ -160,3 +160,50 @@ function removeFromCart(courseId) {
 
 function getEnrolled() { return JSON.parse(localStorage.getItem(ENROLLED_KEY) || '[]'); }
 function saveEnrolled(list) { localStorage.setItem(ENROLLED_KEY, JSON.stringify(list)); }
+
+// In-progress "add to cart" selection, carried across the Related Class Sections
+// and Enrollment Preferences screens. Shape: { courseId, sections: { L: id, T: id } }
+var PENDING_KEY = 'erp_demo_pending';
+function getPending() { return JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); }
+function savePending(p) { localStorage.setItem(PENDING_KEY, JSON.stringify(p)); }
+function clearPending() { localStorage.removeItem(PENDING_KEY); }
+
+// ---- component vocabulary ----
+var COMP_NAME = { L: 'Lecture', T: 'Tutorial', P: 'Laboratory' };
+var COMP_ABBR = { L: 'LEC', T: 'TUT', P: 'LAB' };
+
+// "MoWeFr" -> ['Mo','We','Fr']
+function splitDays(days) { return (days || '').match(/[A-Z][a-z]/g) || []; }
+
+// "9:00AM - 9:50AM" -> { start: 9, end: 10 } as whole grid columns (8..17)
+function slotRange(time) {
+  var m = (time || '').match(/(\d+):(\d+)(AM|PM)\s*-\s*(\d+):(\d+)(AM|PM)/);
+  if (!m) return null;
+  function h24(h, mer) { h = +h % 12; return mer === 'PM' ? h + 12 : h; }
+  var s = h24(m[1], m[3]);
+  var e = h24(m[4], m[6]) + (+m[5] > 0 ? 1 : 0);
+  return { start: s, end: Math.max(e, s + 1) };
+}
+
+// Flatten cart/enrolled entries into { day, start, end, label, course, comp } blocks.
+function scheduleBlocks(entries) {
+  var out = [];
+  entries.forEach(function (e) {
+    var c = COURSES[e.courseId];
+    Object.keys(e.sections).forEach(function (type) {
+      var s = e.sections[type];
+      if (typeof s === 'string') s = (c.sections[type] || []).find(function (x) { return x.id === s; });
+      if (!s) return;
+      var r = slotRange(s.time);
+      if (!r) return;
+      splitDays(s.days).forEach(function (d) {
+        out.push({
+          day: d, start: r.start, end: r.end, courseId: e.courseId,
+          code: c.code, comp: type, sec: s,
+          label: c.code.replace(/\s+/g, '-') + '(' + COMP_ABBR[type] + ')'
+        });
+      });
+    });
+  });
+  return out;
+}

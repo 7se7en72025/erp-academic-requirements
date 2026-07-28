@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add Classes to Shopping Cart</title>
+<link rel="stylesheet" href="chrome.css">
+</head>
+<body>
+<div id="chrome-root"></div>
+<script src="data.js"></script>
+<script src="chrome.js"></script>
+<script>
+renderChrome({ active: 'shopping-cart', pageName: 'Registration' });
+
+// Validate is a dry run: it reports on the cart without enrolling anything.
+var rows = getCart().map(function (e) {
+  var c = COURSES[e.courseId];
+  var parts = c.code.split(' ');
+  return '<tr><td>' + parts[0] + '</td><td>' + parts[1] + '</td>' +
+    '<td>OK to Add</td>' +
+    '<td class="center"><span class="chk">&#10003;</span></td></tr>';
+}).join('') || '<tr><td colspan="4" style="padding:16px;">Your shopping cart is empty.</td></tr>';
+
+document.getElementById('main-content').innerHTML =
+  idRowHtml() + tabsHtml('Plan') +
+  '<div class="subnav"><span class="current">Shopping Cart</span>' +
+    '<span class="sep">|</span><a href="#">Course History</a></div>' +
+  '<h1 class="page-title">Shopping Cart</h1>' +
+  '<h2 class="page-title" style="border:none;">Add Classes to Shopping Cart</h2>' +
+  '<p class="breadcrumb">View the following status report for enrollment confirmations and errors</p>' +
+  '<div class="legend">' +
+    '<span><span class="chk">&#10003;</span> OK to Add</span>' +
+    '<span><span class="xmark">&#10008;</span> Potential Problem</span>' +
+  '</div>' +
+  '<div class="grid-scroll" style="margin-left:8px;"><table class="data">' +
+    '<thead><tr><th colspan="2">Description</th><th>Message</th><th>Status</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody>' +
+  '</table></div>' +
+  '<div class="cart-actions">' +
+    '<button class="ps-btn" onclick="location.href=\'shopping-cart.html\'">Registration Cart</button>' +
+    '<button class="ps-btn primary" onclick="location.href=\'enroll-results.html\'">Proceed to Enroll</button>' +
+  '</div>' +
+  '<p class="go-top"><a href="#">Go to top</a></p>';
+</script>
+</body>
+</html>

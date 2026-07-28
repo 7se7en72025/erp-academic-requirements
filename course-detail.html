@@ -11,118 +11,115 @@
 <script src="data.js"></script>
 <script src="chrome.js"></script>
 <script>
-renderChrome({ active: 'academic-requirements', pageName: 'My Academics' });
+renderChrome({ active: 'academic-requirements', pageName: 'Registration' });
 
 var params = new URLSearchParams(location.search);
 var courseId = params.get('course') || COURSE_ORDER[0];
 var course = COURSES[courseId];
+var justAdded = params.get('added');
+var showSections = params.get('sections') === '1';
 
-// step state (in-memory, resets per page load)
-var chosen = {}; // type -> section object
+// The first listed component is the one picked from the Section list below;
+// any further components are picked on the Related Class Sections screen.
+var primary = course.components[0].type;
 
-var COMP_NAME = { L: 'Lecture', T: 'Tutorial', P: 'Laboratory' };
-var COMP_ABBR = { L: 'LEC', T: 'TUT', P: 'LAB' };
-
-function statusDot(status) {
-  var cls = status === 'open' ? 'open' : status === 'wait' ? 'wait' : 'closed';
-  var label = status === 'open' ? 'Open' : status === 'wait' ? 'Wait List' : 'Closed';
-  return '<span class="dot ' + cls + '"></span>' + label;
-}
-
-function sectionTable(type) {
-  var secs = course.sections[type] || [];
-  var rows = secs.map(function (s) {
-    var disabled = s.status === 'closed' ? 'disabled' : '';
-    var picked = chosen[type] && chosen[type].id === s.id;
-    return '<tr' + (picked ? ' style="background:#eef7ee;"' : '') + '>' +
-      '<td>' + s.nbr + '</td>' +
-      '<td>' + s.id + '-' + COMP_ABBR[type] + '</td>' +
-      '<td>' + s.days + ' ' + s.time + '</td><td>' + s.room + '</td>' +
-      '<td>' + s.instructor + '</td>' +
-      '<td>' + (s.exam || '') + '</td><td>' + (s.fnan || '') + '</td>' +
-      '<td>' + statusDot(s.status) + '</td>' +
-      '<td><button class="ps-btn slim" ' + disabled + ' onclick="selectSection(\'' + type + '\',\'' + s.id + '\')">' +
-        (picked ? 'Selected' : 'Select') + '</button></td>' +
-      '</tr>';
-  }).join('');
-  return '<div class="panel">' +
-    '<div class="panel-title">Select ' + COMP_NAME[type] + ' section' +
-      (course.components.find(function(c){return c.type===type;}).required ? ' (Required):' : ':') + '</div>' +
-    '<div class="grid-scroll"><table class="data">' +
-      '<thead><tr><th>Class Nbr</th><th>Section</th><th>Schedule</th><th>Room</th>' +
-      '<th>Instructor</th><th>Exam Date</th><th>FN/AN</th><th>Status</th><th></th></tr></thead>' +
-      '<tbody>' + rows + '</tbody>' +
-    '</table></div></div>';
-}
-
-function chosenSummary() {
-  var keys = Object.keys(chosen);
-  if (!keys.length) return '';
-  var rows = keys.map(function (t) {
-    var s = chosen[t];
-    return '<tr><td>' + course.code + '-' + s.id + '</td><td>' + COMP_NAME[t] + '</td>' +
-      '<td>' + s.days + ' ' + s.time + '</td><td>' + s.room + '</td><td>' + s.instructor + '</td></tr>';
-  }).join('');
-  return '<div class="panel"><div class="panel-title">Class Preferences</div><div class="panel-body">' +
-    '<div class="grid-scroll"><table class="data"><thead><tr><th>Section</th><th>Component</th><th>Days &amp; Times</th><th>Room</th><th>Instructor</th></tr></thead>' +
-    '<tbody>' + rows + '</tbody></table></div>' +
-    '<div style="margin-top:12px;">' +
-      (keys.length < course.components.length
-        ? '<span style="color:#666;">Select the remaining required section above, then continue.</span>'
-        : '<button class="ps-btn primary" onclick="confirmAdd()">Next</button>') +
+function sectionBlock(s) {
+  var disabled = s.status === 'closed' ? 'disabled' : '';
+  return '<div class="sec-block">' +
+    '<div class="grid-title">Section</div>' +
+    '<table class="data">' +
+      '<thead><tr><th>Section</th><th>Session</th><th>FN/AN</th><th>Exam Date</th>' +
+      '<th>Status</th><th></th></tr></thead>' +
+      '<tbody><tr>' +
+        '<td>' + s.id + '-' + COMP_ABBR[primary] + ' (' + s.nbr + ')</td>' +
+        '<td>H</td><td>' + (s.fnan || '') + '</td><td>' + (s.exam || '') + '</td>' +
+        '<td class="center">' + statusCellHtml(s.status) + '</td>' +
+        '<td class="center"><button class="ps-btn slim" ' + disabled +
+          ' onclick="selectSection(\'' + s.id + '\')">Select</button></td>' +
+      '</tr></tbody>' +
+    '</table>' +
+    '<div class="sec-details">' +
+      '<div class="grid-title">Section Details</div>' +
+      '<table class="data">' +
+        '<thead><tr><th>Days</th><th>Start</th><th>End</th><th>Room</th>' +
+        '<th>Instructor</th><th>Dates</th></tr></thead>' +
+        '<tbody><tr>' +
+          '<td>' + s.days + '</td>' +
+          '<td>' + s.time.split(' - ')[0] + '</td>' +
+          '<td>' + s.time.split(' - ')[1] + '</td>' +
+          '<td>' + s.room + '</td>' +
+          '<td>' + s.instructor + '</td>' +
+          '<td>03/08/2026 - 12/12/2026</td>' +
+        '</tr></tbody>' +
+      '</table>' +
     '</div>' +
+  '</div>';
+}
+
+function sectionsHtml() {
+  var secs = course.sections[primary] || [];
+  return schedulePanelsHtml() +
+    weeklyGridHtml(scheduleBlocks(getEnrolled().concat(getCart()))) +
+    statusLegendHtml() +
+    '<div class="req-sub">' + course.code + ' Sections for ' + TERM + '</div>' +
+    '<p class="grid-nav" style="text-align:right;">1-' + secs.length + ' of ' + secs.length + '</p>' +
+    secs.map(sectionBlock).join('');
+}
+
+function bannerHtml() {
+  if (!justAdded) return '';
+  return '<div class="confirm-banner"><span class="chk">&#10003;</span><div>' +
+    '<strong>' + course.code + '</strong> has been added to your Shopping Cart.<br>' +
+    'To enroll in classes from your ' + TERM + ' Shopping Cart, ' +
+    '<a href="shopping-cart.html">select here</a>.' +
   '</div></div>';
 }
 
 function render() {
-  var needed = course.components.map(function (c) { return c.type; });
-  var pending = needed.filter(function (t) { return !chosen[t]; });
-
-  var html =
+  document.getElementById('main-content').innerHTML =
     idRowHtml() + tabsHtml('My Academics') +
-    '<div class="subnav"><a href="academic-requirements.html">My Academic Requirements</a>' +
-    '<span class="sep">|</span><span class="current">Course Detail</span></div>' +
-    '<h1 class="page-title">' + course.code + ' - ' + course.name + '</h1>' +
-    '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +
+    '<div class="subnav"><a href="academic-requirements.html">My Academic Requirements</a></div>' +
+    '<h1 class="page-title">Course Detail</h1>' +
+    bannerHtml() +
+    '<p><a href="academic-requirements.html">Return to My Academic Requirements</a></p>' +
+    '<p class="breadcrumb">' + course.code + ' - ' + course.name + '</p>' +
     '<div class="panel"><div class="panel-title">Course Detail</div><div class="panel-body">' +
-      '<p><strong>Career:</strong> First Degree &nbsp; <strong>Units:</strong> ' + course.units.toFixed(2) +
-      ' &nbsp; <strong>Grading Basis:</strong> Course Grading</p>' +
-      '<p><strong>Course Components:</strong> ' + course.components.map(function(c){return COMP_NAME[c.type] + (c.required ? ' (Required)' : '');}).join(', ') + '</p>' +
-      '<p><strong>Campus:</strong> Hyderabad On Campus &nbsp; <strong>Academic Organization:</strong> ' + course.dept + '</p>' +
-      '<button class="ps-btn" id="showSectionsBtn">Show Sections</button>' +
+      '<div class="twoup" style="margin:0;">' +
+        '<div>' +
+          '<p><strong>Career</strong> &nbsp; First Degree</p>' +
+          '<p><strong>Units</strong> &nbsp; ' + course.units.toFixed(2) + '</p>' +
+          '<p><strong>Grading Basis</strong> &nbsp; Course Grading</p>' +
+          '<p><strong>Course Components</strong><br>' +
+            course.components.map(function (c) {
+              return '&nbsp;&nbsp;' + COMP_NAME[c.type] + ' &nbsp; ' + (c.required ? 'Required' : 'Optional');
+            }).join('<br>') + '</p>' +
+          '<p><strong>Campus</strong> &nbsp; Pilani Campus</p>' +
+          '<p><strong>Academic Group</strong> &nbsp; ' + course.acadGroup + '</p>' +
+          '<p><strong>Academic Organization</strong> &nbsp; ' + course.dept + '</p>' +
+        '</div>' +
+        '<div><button class="ps-btn" onclick="reveal()">View Class Sections</button></div>' +
+      '</div>' +
     '</div></div>' +
-    '<div id="sectionsArea"></div>' +
-    '<div id="prefsArea">' + chosenSummary() + '</div>' +
-    '<div id="confirmArea"></div>' +
-    '<p><a href="academic-requirements.html">&laquo; Return to My Academic Requirements</a></p>';
-
-  document.getElementById('main-content').innerHTML = html;
-  document.getElementById('showSectionsBtn').onclick = function () {
-    document.getElementById('sectionsArea').innerHTML = needed.map(sectionTable).join('');
-  };
+    '<h2 class="page-title">Course Schedule</h2>' +
+    '<div class="btn-row">' +
+      '<label><strong>*Terms Offered</strong> ' +
+        '<select><option>' + TERM + '</option></select></label>' +
+      '<button class="ps-btn" onclick="reveal()">Show Sections</button>' +
+    '</div>' +
+    '<div id="sectionsArea">' + (showSections ? sectionsHtml() : '') + '</div>' +
+    '<p><a href="academic-requirements.html">Return to My Academic Requirements</a></p>' +
+    '<p class="go-top"><a href="#">Go to top</a></p>';
 }
 
-function selectSection(type, secId) {
-  chosen[type] = course.sections[type].find(function (s) { return s.id === secId; });
-  render();
-  document.getElementById('sectionsArea').innerHTML = course.components
-    .map(function (c) { return c.type; })
-    .map(sectionTable)
-    .join('');
+function reveal() {
+  document.getElementById('sectionsArea').innerHTML = sectionsHtml();
 }
 
-function confirmAdd() {
-  addToCart({ courseId: courseId, sections: chosen });
-  document.getElementById('confirmArea').innerHTML =
-    '<div class="modal-overlay" id="modalOverlay"><div class="modal-box">' +
-      '<p><strong>' + course.code + '</strong> has been added to your Shopping Cart. To register in this course you need to go to Registration Shopping Cart and click the Validate button.</p>' +
-      '<div class="modal-actions"><button class="ps-btn primary" onclick="closeModal()">OK</button></div>' +
-    '</div></div>' +
-    '<p style="color:var(--green);">&#10004; ' + course.code + ' has been added to your Shopping Cart. <a href="shopping-cart.html">Go to Shopping Cart</a></p>';
-}
-function closeModal() {
-  var m = document.getElementById('modalOverlay');
-  if (m) m.classList.add('hidden');
+function selectSection(secId) {
+  savePending({ courseId: courseId, sections: (function () { var o = {}; o[primary] = secId; return o; })() });
+  location.href = course.components.length > 1
+    ? 'related-sections.html'
+    : 'enrollment-preferences.html';
 }
 
 render();

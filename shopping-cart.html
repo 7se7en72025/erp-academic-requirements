@@ -11,65 +11,115 @@
 <script src="data.js"></script>
 <script src="chrome.js"></script>
 <script>
-renderChrome({ active: 'shopping-cart', pageName: 'My Academics' });
+renderChrome({ active: 'shopping-cart', pageName: 'Registration' });
 
-var COMP_NAME = { L: 'Lecture', T: 'Tutorial', P: 'Laboratory' };
-
-function render() {
+// One row per component, the way the real cart lists them.
+function cartRows() {
   var cart = getCart();
-  var rowsHtml = '';
   if (!cart.length) {
-    rowsHtml = '<tr><td colspan="7" style="text-align:center;color:#666;padding:16px;">Your shopping cart is empty.</td></tr>';
-  } else {
-    cart.forEach(function (entry) {
-      var course = COURSES[entry.courseId];
-      Object.keys(entry.sections).forEach(function (type) {
-        var s = entry.sections[type];
-        rowsHtml += '<tr>' +
-          '<td><input type="checkbox" checked data-course="' + entry.courseId + '"></td>' +
-          '<td>' + course.code + '-' + s.id + ' ' + COMP_NAME[type] + '</td>' +
-          '<td>' + s.days + ' ' + s.time + '</td><td>' + s.room + '</td>' +
-          '<td>' + s.instructor + '</td><td class="num">' + course.units.toFixed(2) + '</td>' +
-          '<td><span class="dot open"></span>Open</td>' +
-          '</tr>';
-      });
-    });
+    return '<tr><td colspan="8" style="padding:16px;">Your shopping cart is empty.</td></tr>';
   }
-
-  document.getElementById('main-content').innerHTML =
-    idRowHtml() + tabsHtml('Enroll') +
-    '<div class="subnav"><span class="current">Enrollment Shopping Cart</span></div>' +
-    '<h1 class="page-title">Enrollment Shopping Cart</h1>' +
-    '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +
-    '<div class="legend">' +
-      '<span><span class="dot open"></span>Open</span>' +
-      '<span><span class="dot closed"></span>Closed</span>' +
-      '<span><span class="dot wait"></span>Wait List</span>' +
-    '</div>' +
-    '<div class="panel"><div class="panel-title">' + TERM + ' Shopping Cart</div>' +
-      '<div class="grid-scroll"><table class="data">' +
-        '<thead><tr><th></th><th>Class</th><th>Days/Times</th><th>Room</th><th>Instructor</th><th class="num">Units</th><th>Status</th></tr></thead>' +
-        '<tbody>' + rowsHtml + '</tbody>' +
-      '</table></div>' +
-      '<div class="panel-body">' +
-        '<button class="ps-btn" id="deleteBtn" ' + (cart.length ? '' : 'disabled') + '>Delete Selected</button> ' +
-        '<button class="ps-btn primary" id="validateBtn" ' + (cart.length ? '' : 'disabled') + '>Validate</button>' +
-      '</div>' +
-    '</div>' +
-    '<p><a href="academic-requirements.html">&laquo; Add another class</a></p>';
-
-  document.getElementById('validateBtn').onclick = function () {
-    location.href = 'enroll-results.html';
-  };
-  document.getElementById('deleteBtn').onclick = function () {
-    document.querySelectorAll('#main-content input[type=checkbox]:checked').forEach(function (cb) {
-      removeFromCart(cb.dataset.course);
+  var out = '';
+  COURSE_ORDER.forEach(function (id) {
+    var e = cart.find(function (c) { return c.courseId === id; });
+    if (!e) return;
+    var c = COURSES[id];
+    c.components.forEach(function (comp, i) {
+      var s = e.sections[comp.type];
+      if (typeof s === 'string') s = c.sections[comp.type].find(function (x) { return x.id === s; });
+      if (!s) return;
+      out += '<tr>' +
+        '<td class="pick">' + (i === 0
+          ? '<input type="checkbox" class="cartchk" value="' + id + '">' : '') + '</td>' +
+        '<td>' + c.code + '-' + s.id + '<br>(' + s.nbr + ')</td>' +
+        '<td>' + c.name + '<br>(' + COMP_NAME[comp.type] + ')</td>' +
+        '<td>' + s.days + ' ' + s.time + '</td>' +
+        '<td>' + s.room + '</td>' +
+        '<td>' + s.instructor + '</td>' +
+        '<td class="num">' + (i === 0 ? c.units.toFixed(2) : '') + '</td>' +
+        '<td class="center">' + statusCellHtml(s.status) + '</td>' +
+      '</tr>';
     });
-    render();
-  };
+  });
+  return out;
 }
 
-render();
+function scheduleSection() {
+  var enrolled = getEnrolled();
+  if (!enrolled.length) {
+    return '<p style="text-align:center;margin:14px 0;">You are not registered for classes in this term.</p>';
+  }
+  var rows = '';
+  enrolled.forEach(function (e) {
+    var c = COURSES[e.courseId];
+    Object.keys(e.sections).forEach(function (t) {
+      var s = e.sections[t];
+      if (typeof s === 'string') s = c.sections[t].find(function (x) { return x.id === s; });
+      rows += '<tr><td>' + c.code + '-' + s.id + '</td><td>' + c.name + '</td>' +
+        '<td>' + s.days + ' ' + s.time + '</td><td>' + s.room + '</td>' +
+        '<td>' + s.instructor + '</td></tr>';
+    });
+  });
+  return '<div class="grid-scroll"><table class="data"><thead><tr><th>Class</th>' +
+    '<th>Description</th><th>Days/Times</th><th>Room</th><th>Instructor</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody></table></div>';
+}
+
+document.getElementById('main-content').innerHTML =
+  idRowHtml() + tabsHtml('Plan') +
+  '<div class="subnav"><span class="current">Shopping Cart</span>' +
+    '<span class="sep">|</span><a href="#">Course History</a></div>' +
+  '<h1 class="page-title">Shopping Cart</h1>' +
+  '<div class="panel"><div class="panel-title">Registration Slot Details</div>' +
+    '<div class="grid-scroll"><table class="data"><thead><tr><th>Priority Number</th>' +
+    '<th>Registration Date</th><th>Start Time</th><th>End Time</th></tr></thead>' +
+    '<tbody><tr><td>1</td><td>28/07/2026</td><td>9:00AM</td><td>11:59PM</td></tr></tbody>' +
+    '</table></div></div>' +
+  statusLegendHtml() +
+  '<div class="cart-layout">' +
+    '<div class="cart-rail">' +
+      '<div class="rail-head"><strong>Add to Cart</strong></div>' +
+      '<div><a href="academic-requirements.html">Enter Class Nbr</a></div>' +
+      '<div class="rail-head"><strong>Find Classes</strong></div>' +
+      '<div><label><input type="radio" name="find" checked> Class Search</label></div>' +
+    '</div>' +
+    '<div class="cart-main">' +
+      '<div class="grid" style="margin-left:0;">' +
+        '<div class="grid-title">' + TERM + ' Shopping Cart</div>' +
+        '<div class="grid-scroll"><table class="data">' +
+          '<thead><tr><th>Select</th><th>Class</th><th>Description</th><th>Days/Times</th>' +
+          '<th>Room</th><th>Instructor</th><th>Units</th><th>Status</th></tr></thead>' +
+          '<tbody>' + cartRows() + '</tbody>' +
+        '</table></div>' +
+      '</div>' +
+      '<div class="cart-actions">' +
+        '<button class="ps-btn" onclick="selectAll()">Select All</button>' +
+        '<span>for selected</span>' +
+        '<button class="ps-btn" onclick="deleteSelected()">Delete</button>' +
+        '<button class="ps-btn primary" onclick="validate()">Validate</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+  '<div class="req-sub" style="margin-top:26px;">My ' + TERM + ' Class Schedule</div>' +
+  scheduleSection() +
+  '<p class="go-top"><a href="#">Go to top</a></p>';
+
+function selectAll() {
+  document.querySelectorAll('.cartchk').forEach(function (b) { b.checked = true; });
+}
+
+function deleteSelected() {
+  var ids = Array.prototype.slice.call(document.querySelectorAll('.cartchk:checked'))
+    .map(function (b) { return b.value; });
+  if (!ids.length) { alert('Select at least one class first.'); return; }
+  ids.forEach(removeFromCart);
+  location.reload();
+}
+
+function validate() {
+  if (!getCart().length) { alert('Your shopping cart is empty.'); return; }
+  location.href = 'validate-results.html';
+}
 </script>
 </body>
 </html>

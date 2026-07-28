@@ -3,19 +3,11 @@
 // into <div id="chrome-root"></div>, then fill #main-content.
 
 var SIDEBAR_ITEMS = [
-  { key: 'advisors',              label: 'My Advisors',                    href: '#' },
-  { key: 'academic-requirements', label: 'My Academic Requirements',       href: 'academic-requirements.html' },
-  { key: 'course-history',        label: 'Course History',                 href: '#' },
-  { key: 'view-grades',           label: 'View Grades',                    href: '#' },
-  { key: 'mid-sem-grades',        label: 'Mid Semester Grades',            href: '#' },
-  { key: 'pre-compre',            label: 'Pre Compre Marks View',          href: '#' },
-  { key: 'minor-progress',        label: 'Minor Program Progress Details', href: '#' },
-  { key: 'academic-reports',      label: 'Academic  Reports',              href: '#' },
-  { key: 'intra-transfer',        label: 'Intra Campus Transfer View',     href: '#' },
-  { key: 'feedback',              label: 'Student Feedback',               href: '#' },
-  { key: 'attendance',            label: 'Attendance View Student',        href: '#' },
-  { key: 'shopping-cart',         label: 'Enrollment Shopping Cart',       href: 'shopping-cart.html' },
-  { key: 'view-my-classes',       label: 'View My Classes',                href: 'weekly-schedule.html' }
+  { key: 'view-my-classes',       label: 'View My Classes',          href: 'weekly-schedule.html' },
+  { key: 'academic-requirements', label: 'My Academic Requirements', href: 'academic-requirements.html' },
+  { key: 'add-classes',           label: 'Enrollment:  Add Classes', href: 'enroll-results.html' },
+  { key: 'swap-classes',          label: 'Enrollment:  Swap Classes', href: '#' },
+  { key: 'shopping-cart',         label: 'Enrollment Shopping Cart', href: 'shopping-cart.html' }
 ];
 
 var SIDEBAR_ICON =
@@ -41,7 +33,7 @@ function renderChrome(opts) {
     '<div class="sisprd">' + (opts.instance || '11120241312  -  SISPRD') + '</div>' +
     '<header class="appheader">' +
       '<a class="home-link" href="student-homepage.html">&#8249; Student Homepage</a>' +
-      '<div class="page-name">' + (opts.pageName || 'My Academics') + '</div>' +
+      '<div class="page-name">' + (opts.pageName || 'Registration') + '</div>' +
       '<div class="icons">' +
         '<a title="Home" href="student-homepage.html">&#8962;</a>' +
         '<a title="Search" href="#">&#9906;</a>' +
@@ -63,6 +55,7 @@ function renderChrome(opts) {
 function resetDemo() {
   localStorage.removeItem(CART_KEY);
   localStorage.removeItem(ENROLLED_KEY);
+  localStorage.removeItem(PENDING_KEY);
   location.href = 'academic-requirements.html';
 }
 
@@ -85,4 +78,77 @@ function tabsHtml(active) {
       return '<li class="' + (t === active ? 'active' : '') + '"><a href="#">' + t + '</a></li>';
     }).join('') +
   '</ul>';
+}
+
+// ---- Open / Closed / Wait List legend bar ----
+function statusLegendHtml() {
+  return '<div class="legend">' +
+    '<span><span class="dot open"></span>Open</span>' +
+    '<span><span class="dot closed"></span>Closed</span>' +
+    '<span><span class="dot wait"></span>Wait List</span>' +
+  '</div>';
+}
+
+function statusCellHtml(status) {
+  var cls = status === 'open' ? 'open' : status === 'wait' ? 'wait' : 'closed';
+  var label = status === 'open' ? 'Open' : status === 'wait' ? 'Wait List' : 'Closed';
+  return '<span class="dot ' + cls + '" title="' + label + '"></span>';
+}
+
+// ---- Class Meeting Days grid: rows Mon-Sun, columns 8AM..6PM ----
+// blocks come from scheduleBlocks(); `numbered` matches the Related Class
+// Sections variant, which prefixes each row with its index.
+var GRID_DAYS = [
+  ['Mo', 'MONDAY'], ['Tu', 'TUESDAY'], ['We', 'WEDNESDAY'], ['Th', 'THURSDAY'],
+  ['Fr', 'FRIDAY'], ['Sa', 'SATURDAY'], ['Su', 'SUNDAY']
+];
+
+function hourLabel(h) {
+  var mer = h < 12 ? 'AM' : 'PM';
+  var hh = h % 12 === 0 ? 12 : h % 12;
+  return ('0' + hh).slice(-2) + '.00 ' + mer;
+}
+
+function weeklyGridHtml(blocks, numbered) {
+  var head = '<th>Class Meeting Days</th>';
+  for (var h = 8; h < 18; h++) head += '<th>' + hourLabel(h) + ' - ' + hourLabel(h + 1) + '</th>';
+
+  var rows = GRID_DAYS.map(function (d, i) {
+    var cells = '';
+    for (var h = 8; h < 18; h++) {
+      var hit = blocks.filter(function (b) { return b.day === d[0] && h >= b.start && h < b.end; });
+      cells += '<td class="slot' + (hit.length ? ' busy' : '') + '">' +
+        hit.map(function (b) { return b.label; }).join('<br>') + '</td>';
+    }
+    return '<tr><td class="daycell">' + (numbered ? (i + 1) + ' ' : '') + d[1] + '</td>' + cells + '</tr>';
+  }).join('');
+
+  return '<div class="grid-scroll"><table class="data weekly-grid">' +
+    '<thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+}
+
+// ---- "My Class Schedule" / "Registration Course Cart" side-by-side panels ----
+function schedulePanelsHtml() {
+  var enrolled = getEnrolled();
+  var cart = getCart();
+
+  function lines(entries, empty) {
+    if (!entries.length) return '<p class="muted">' + empty + '</p>';
+    return entries.map(function (e) {
+      var c = COURSES[e.courseId];
+      return Object.keys(e.sections).map(function (t) {
+        var s = e.sections[t];
+        if (typeof s === 'string') s = c.sections[t].find(function (x) { return x.id === s; });
+        return '<div class="mini-row"><span class="mini-code">' + c.code + '</span>' +
+          '<span>' + s.days + ' ' + s.time + '<br>Room ' + s.room + '</span></div>';
+      }).join('');
+    }).join('');
+  }
+
+  return '<div class="twoup">' +
+    '<div class="panel"><div class="panel-title">My Class Schedule</div>' +
+      '<div class="panel-body">' + lines(enrolled, 'You are not registered for classes in this term.') + '</div></div>' +
+    '<div class="panel"><div class="panel-title">Registration Course Cart</div>' +
+      '<div class="panel-body">' + lines(cart, 'Your shopping cart is empty.') + '</div></div>' +
+  '</div>';
 }

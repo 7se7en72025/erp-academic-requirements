@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add to Shopping Cart - Enrollment Preferences</title>
+<link rel="stylesheet" href="chrome.css">
+</head>
+<body>
+<div id="chrome-root"></div>
+<script src="data.js"></script>
+<script src="chrome.js"></script>
+<script>
+renderChrome({ active: 'academic-requirements', pageName: 'Registration' });
+
+var pending = getPending();
+if (!pending) location.replace('academic-requirements.html');
+
+var course = COURSES[pending.courseId];
+
+// resolve the pending section ids into full section objects
+var chosen = {};
+course.components.forEach(function (c) {
+  var id = pending.sections[c.type];
+  if (id) chosen[c.type] = course.sections[c.type].find(function (s) { return s.id === id; });
+});
+
+function prefLines() {
+  return course.components.map(function (c) {
+    var s = chosen[c.type];
+    return '<tr><td>' + course.code.split(' ')[0] + '</td>' +
+      '<td>' + course.code.split(' ')[1] + '-' + s.id + '</td>' +
+      '<td>' + COMP_NAME[c.type] + '</td>' +
+      '<td>' + statusCellHtml(s.status) +
+        (s.status === 'open' ? 'Open' : s.status === 'wait' ? 'Wait List' : 'Closed') + '</td></tr>';
+  }).join('');
+}
+
+function detailRows() {
+  return course.components.map(function (c) {
+    var s = chosen[c.type];
+    return '<tr><td>' + s.id + '</td><td>' + COMP_NAME[c.type] + '</td>' +
+      '<td>' + s.days + ' ' + s.time + '</td><td>' + s.room + '</td>' +
+      '<td>' + s.instructor + '</td><td>03/08/2026 - 12/12/2026</td></tr>';
+  }).join('');
+}
+
+document.getElementById('main-content').innerHTML =
+  idRowHtml() + tabsHtml('My Academics') +
+  '<div class="subnav"><a href="academic-requirements.html">My Academic Requirements</a></div>' +
+  '<h1 class="page-title">Add to Shopping Cart - Enrollment Preferences</h1>' +
+  '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '<br>' +
+    course.code + ' - ' + course.name + '</p>' +
+  '<div class="panel"><div class="panel-title">Class Preferences</div><div class="panel-body">' +
+    '<div class="twoup" style="margin:0;">' +
+      '<div>' +
+        '<table class="data" style="border:none;"><tbody>' + prefLines() + '</tbody></table>' +
+        '<p style="margin-top:14px;"><strong>Session</strong> &nbsp; Regular Session<br>' +
+          '<strong>Career</strong> &nbsp; First Degree</p>' +
+      '</div>' +
+      '<div>' +
+        '<p><strong>Permission Nbr</strong> <input type="text" size="8"></p>' +
+        '<p><strong>Grading</strong> &nbsp; Course Grading</p>' +
+        '<p><strong>Units</strong> &nbsp; ' + course.units.toFixed(2) + '</p>' +
+      '</div>' +
+    '</div>' +
+  '</div></div>' +
+  '<div class="cart-actions">' +
+    '<button class="ps-btn" onclick="cancel()">Cancel</button>' +
+    '<button class="ps-btn" onclick="back()">Previous</button>' +
+    '<button class="ps-btn primary" onclick="finish()">Next</button>' +
+  '</div>' +
+  '<div class="grid-scroll" style="margin-top:20px;"><table class="data">' +
+    '<thead><tr><th>Section</th><th>Component</th><th>Days &amp; Times</th>' +
+    '<th>Room</th><th>Instructor</th><th>Start/End Date</th></tr></thead>' +
+    '<tbody>' + detailRows() + '</tbody>' +
+  '</table></div>' +
+  '<p class="go-top"><a href="#">Go to top</a></p>';
+
+function finish() {
+  var id = pending.courseId;
+  addToCart({ courseId: id, sections: chosen });
+  clearPending();
+  location.href = 'course-detail.html?course=' + id + '&added=1';
+}
+
+function back() {
+  location.href = course.components.length > 1
+    ? 'related-sections.html'
+    : 'course-detail.html?course=' + pending.courseId + '&sections=1';
+}
+
+function cancel() {
+  var id = pending.courseId;
+  clearPending();
+  location.href = 'course-detail.html?course=' + id + '&sections=1';
+}
+</script>
+</body>
+</html>

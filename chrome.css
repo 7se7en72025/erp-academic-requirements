@@ -284,3 +284,70 @@ table.data td a:hover { text-decoration: underline; }
 
 .go-top { margin: 26px 0 0 8px; padding-top: 10px; border-top: 1px solid #cfcfcf; font-size: 12px; }
 .go-top a { color: var(--link); text-decoration: none; }
+
+/* ---- side-by-side "My Class Schedule" / "Registration Course Cart" ---- */
+.twoup { display: flex; gap: 26px; align-items: flex-start; margin: 0 0 16px 8px; }
+.twoup .panel { flex: 1 1 0; min-width: 0; margin: 0; }
+.twoup .panel-title { background: #fff; border-bottom: none; padding-bottom: 2px; }
+.twoup .panel-body { padding-top: 4px; }
+.muted { color: #444; margin: 0; }
+.mini-row { display: flex; gap: 18px; padding: 3px 0; font-size: 12.5px; }
+.mini-row .mini-code { flex: 0 0 96px; }
+
+/* ---- weekly meeting-days grid ---- */
+.weekly-grid th { font-size: 11px; white-space: nowrap; padding: 5px 7px; }
+.weekly-grid td { font-size: 11px; padding: 5px 7px; }
+.weekly-grid td.daycell { white-space: nowrap; font-size: 12px; }
+.weekly-grid td.slot { height: 30px; min-width: 78px; }
+
+/* ---- Section / Section Details stacked blocks (Course Schedule screen) ---- */
+.sec-block { margin: 0 0 22px 14px; }
+.sec-block .grid-title { border: 1px solid #ddc9a3; border-bottom: none; }
+.sec-block table.data { border: 1px solid #ddc9a3; }
+.sec-details { margin: 0 0 0 60px; }
+.sec-details .grid-title { font-size: 12.5px; }
+
+/* ---- radio picker (Related Class Sections) ---- */
+table.data td.pick { width: 34px; text-align: center; }
+table.data tr.picked td { background: #eef7ee; }
+
+/* ---- confirmation banner ---- */
+.confirm-banner {
+  display: flex; gap: 14px; align-items: flex-start;
+  margin: 0 0 22px 8px; font-size: 13.5px; line-height: 1.6;
+}
+.confirm-banner .chk { flex: 0 0 15px; margin-top: 3px; }
+.confirm-banner .xmark { color: #c0392b; font-weight: bold; }
+
+/* ---- PeopleSoft 1-2-3 step chips ---- */
+.stepchips { display: flex; align-items: center; justify-content: flex-end; gap: 0; margin: -26px 0 18px; }
+.stepchips .chip {
+  width: 22px; height: 20px; border: 1px solid #8f8f8f; background: #f0f0f0;
+  color: #555; font-size: 11px; display: flex; align-items: center; justify-content: center;
+}
+.stepchips .chip.active { background: #fff; color: #000; font-weight: bold; border-color: #333; }
+.stepchips .dash { width: 12px; height: 1px; background: #8f8f8f; }
+
+/* ---- weekly calendar (My Class Schedule) ---- */
+.cal { border-collapse: collapse; width: 100%; min-width: 900px; }
+.cal th, .cal td { border: 1px solid var(--border); vertical-align: top; }
+.cal th { background: #fff; color: #000; font-size: 12px; padding: 6px 4px; text-align: center; font-weight: normal; }
+.cal td.timecell { width: 76px; font-size: 12px; padding: 4px 8px; color: #333; }
+.cal td.ev { background: #cfe0b4; padding: 4px 5px; font-size: 11px; text-align: center; line-height: 1.35; }
+.cal td.empty { height: 46px; }
+.weeknav { display: flex; align-items: center; gap: 26px; margin: 0 0 16px 8px; }
+.weeknav .weeklabel {
+  flex: 1; text-align: center; color: var(--orange); font-weight: bold;
+  border: 1px solid var(--border); padding: 6px 10px; background: #f4f4f4;
+}
+.optrow { display: flex; align-items: center; gap: 40px; margin: 0 0 18px 8px; font-size: 13px; }
+.optrow label { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ---- cart page left rail ---- */
+.cart-layout { display: flex; gap: 30px; align-items: flex-start; margin-left: 8px; }
+.cart-rail { flex: 0 0 190px; font-size: 13px; line-height: 2; }
+.cart-rail .rail-head { color: #000; }
+.cart-rail label { display: inline-flex; align-items: center; gap: 8px; color: var(--link); }
+.cart-main { flex: 1; min-width: 0; }
+.cart-actions { display: flex; align-items: center; gap: 16px; justify-content: center; margin: 14px 0 0; }
+.cart-actions .ps-btn { min-width: 120px; }
