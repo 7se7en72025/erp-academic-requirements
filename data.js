@@ -1,9 +1,9 @@
 // Static demo data for the ERP walkthrough replica.
-// All names/instructors are placeholders — not real people or real grades.
+// Instructor names and grades are placeholders — not real people or real marks.
 
 var STUDENT = {
-  name: 'STUDENT NAME',
-  id: '20XXA0PS0000P',
+  name: 'NSA RAIYYAN',
+  id: '2024A2PS1312P',
   campus: 'Birla Institute of Tech & Sci | First Degree'
 };
 
