@@ -13,81 +13,134 @@
 <script>
 renderChrome({ active: 'academic-requirements', pageName: 'My Academics' });
 
-function statusIcon(courseId) {
-  var enrolled = getEnrolled().some(function (e) { return e.courseId === courseId; });
-  var inCart = getCart().some(function (c) { return c.courseId === courseId; });
-  if (enrolled) return '<span class="ic taken" title="Taken">&#10004;</span>';
-  if (inCart) return '<span class="ic prog" title="In Progress">&#9670;</span>';
+var enrolledIds = getEnrolled().map(function (e) { return e.courseId; });
+var cartIds = getCart().map(function (c) { return c.courseId; });
+
+function whenCell(id) {
+  return enrolledIds.indexOf(id) > -1 ? TERM : '';
+}
+function statusCell(id) {
+  if (enrolledIds.indexOf(id) > -1) return '<span class="chk">&#10003;</span>';
+  if (cartIds.indexOf(id) > -1) return '<span class="diamond"></span>';
   return '';
 }
 
-var rows = COURSE_ORDER.map(function (id) {
-  var c = COURSES[id];
-  return '<tr><td>' + statusIcon(id) + '<a href="course-detail.html?course=' + id + '">' + c.code + '</a></td>' +
-    '<td>' + c.name + '</td><td class="num">' + c.units.toFixed(2) + '</td>' +
-    '<td>' + TERM + '</td><td></td><td></td></tr>';
-}).join('');
+function gridHtml(rowsHtml, count) {
+  return '<div class="grid">' +
+    '<div class="grid-title">The following courses may be used to satisfy this requirement:</div>' +
+    '<div class="grid-nav">' +
+      '<a href="#">Personalize</a> | <a href="#">View All</a> | <a href="#">&#8663;</a>' +
+      '<span class="pager">First <span class="pg">&#9664;</span> <strong>1-' + count + ' of ' + count + '</strong> ' +
+      '<span class="pg">&#9654;</span> Last</span>' +
+    '</div>' +
+    '<div class="grid-scroll"><table class="data">' +
+      '<thead><tr><th>Course</th><th>Description</th><th class="num">Units</th>' +
+      '<th>When</th><th>Grade</th><th>Status</th></tr></thead>' +
+      '<tbody>' + rowsHtml + '</tbody>' +
+    '</table></div>' +
+  '</div>';
+}
 
-var takenCount = getEnrolled().length;
+function semesterHtml(sem, idx) {
+  var rows, count, taken;
+  if (sem.courseIds) {
+    count = sem.courseIds.length;
+    taken = sem.courseIds.filter(function (id) { return enrolledIds.indexOf(id) > -1; }).length;
+    rows = sem.courseIds.map(function (id) {
+      var c = COURSES[id];
+      return '<tr><td>' + c.code + '</td>' +
+        '<td><a href="course-detail.html?course=' + id + '">' + c.name + '</a></td>' +
+        '<td class="num">' + c.units.toFixed(2) + '</td>' +
+        '<td>' + whenCell(id) + '</td><td></td>' +
+        '<td class="center">' + statusCell(id) + '</td></tr>';
+    }).join('');
+  } else {
+    count = sem.courses.length;
+    taken = 0;
+    rows = sem.courses.map(function (c) {
+      return '<tr><td>' + c.code + '</td>' +
+        '<td><a href="#">' + c.name + '</a></td>' +
+        '<td class="num">' + c.units.toFixed(2) + '</td>' +
+        '<td></td><td></td><td></td></tr>';
+    }).join('');
+  }
+
+  var bodyId = 'sem-' + idx;
+  var arrow = sem.open ? '&#9660;' : '&#9654;';
+  return '<div class="req-sub click" data-target="' + bodyId + '">' +
+      '<span class="arrow">' + arrow + '</span> ' + sem.name +
+    '</div>' +
+    '<div class="req-body' + (sem.open ? '' : ' hidden') + '" id="' + bodyId + '">' +
+      '<p class="status-line"><strong>Not Satisfied:</strong> All courses are compulsory.</p>' +
+      '<ul class="reqs"><li>Courses: ' + sem.required + ' required, ' + taken +
+        ' taken, ' + (sem.required - taken) + ' needed</li></ul>' +
+      gridHtml(rows, count) +
+    '</div>';
+}
+
+var totalTaken = enrolledIds.length;
+var unitsTaken = getEnrolled().reduce(function (sum, e) { return sum + COURSES[e.courseId].units; }, 0);
 
 document.getElementById('main-content').innerHTML =
-  '<ul class="tabs">' +
-    '<li><a href="#">Search</a></li>' +
-    '<li><a href="#">Plan</a></li>' +
-    '<li><a href="#">Enroll</a></li>' +
-    '<li class="active"><a href="#">My Academics</a></li>' +
-  '</ul>' +
+  idRowHtml() +
+  tabsHtml('My Academics') +
   '<h1 class="page-title">My Academic Requirements</h1>' +
   '<p class="breadcrumb">' + STUDENT.campus + '</p>' +
-  '<p><strong>This report last generated on</strong> ' + new Date().toLocaleString() + '</p>' +
-  '<div style="display:flex;gap:10px;margin:0 0 14px;">' +
+  '<p class="generated"><strong>This report last generated on</strong>' +
+    '<span class="when">' + new Date().toLocaleString('en-GB', {
+      day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: 'numeric', minute: '2-digit', hour12: true
+    }).replace(',', ' ') + '</span></p>' +
+  '<div class="btn-row">' +
     '<button class="ps-btn" id="collapseAll">Collapse All</button>' +
     '<button class="ps-btn" id="expandAll">Expand All</button>' +
-    '<a class="ps-btn" href="shopping-cart.html">View Shopping Cart</a>' +
+    '<button class="ps-btn" onclick="window.print()">View Report as PDF</button>' +
   '</div>' +
   '<div class="legend">' +
-    '<span><i class="ic taken">&#10004;</i> Taken</span>' +
-    '<span><i class="ic prog">&#9670;</i> In Progress</span>' +
-    '<span><i class="ic plan">&#9733;</i> Planned</span>' +
+    '<span><span class="chk">&#10003;</span> Taken</span>' +
+    '<span><span class="diamond"></span> In Progress</span>' +
+    '<span><span class="star">&#9733;</span> Planned</span>' +
   '</div>' +
-  '<div class="panel" id="grp-cs">' +
-    '<div class="panel-title" data-toggle>&#9660; Computer Science</div>' +
-    '<div class="panel-body">' +
-      '<p><strong>Not Satisfied:</strong> Computer Science</p>' +
-      '<div class="panel" style="margin-left:16px;">' +
-        '<div class="panel-title">Computer Sc. FS PS HYDON</div>' +
-        '<div class="panel-body">' +
-          '<p><strong>Not Satisfied:</strong> Computer Sc. FS PS HYDON</p>' +
-          '<ul>' +
-            '<li>Units: 144.00 required, ' + (takenCount * 2.14).toFixed(2) + ' taken, 144.00 needed</li>' +
-            '<li>Courses: 42 required, ' + takenCount + ' taken, ' + (42 - takenCount) + ' needed</li>' +
-            '<li>GPA: 4.500 required, 0.000 actual</li>' +
-          '</ul>' +
-          '<div class="panel">' +
-            '<div class="panel-title">&#9660; Year 1 Sem 1</div>' +
-            '<div class="panel-body">' +
-              '<p><strong>Not Satisfied:</strong> All courses are compulsory.</p>' +
-              '<ul><li>Courses: 7 required, ' + takenCount + ' taken, ' + (7 - takenCount) + ' needed</li></ul>' +
-              '<div class="panel">' +
-                '<div class="panel-title">The following courses may be used to satisfy this requirement:</div>' +
-                '<div class="grid-scroll"><table class="data">' +
-                  '<thead><tr><th>Course</th><th>Description</th><th class="num">Units</th><th>When</th><th>Grade</th><th>Status</th></tr></thead>' +
-                  '<tbody>' + rows + '</tbody>' +
-                '</table></div>' +
-              '</div>' +
-            '</div>' +
-          '</div>' +
-        '</div>' +
+  '<div class="reqgroup">' +
+    '<div class="req-head" data-target="grp-plan"><span class="arrow">&#9660;</span> ' + PROGRAM.plan + '</div>' +
+    '<div class="req-body" id="grp-plan">' +
+      '<p class="status-line"><strong>Not Satisfied:</strong> ' + PROGRAM.plan + '</p>' +
+      '<div class="req-sub">' + PROGRAM.subplan + '</div>' +
+      '<div class="req-body">' +
+        '<p class="status-line"><strong>Not Satisfied:</strong> ' + PROGRAM.subplan + '</p>' +
+        '<ul class="reqs">' +
+          '<li>Units: ' + PROGRAM.unitsRequired.toFixed(2) + ' required, ' + unitsTaken.toFixed(2) +
+            ' taken, ' + (PROGRAM.unitsRequired - unitsTaken).toFixed(2) + ' needed</li>' +
+          '<li>Courses: ' + PROGRAM.coursesRequired + ' required, ' + totalTaken +
+            ' taken, ' + (PROGRAM.coursesRequired - totalTaken) + ' needed</li>' +
+          '<li>GPA: ' + PROGRAM.gpaRequired + ' required, 0.000 actual</li>' +
+        '</ul>' +
+        PROGRAM.semesters.map(semesterHtml).join('') +
       '</div>' +
     '</div>' +
   '</div>' +
-  '<p class="go-top"><a href="#top">&#9650; Go to top</a></p>';
+  '<p class="go-top"><a href="#">&#9650; Go to top</a></p>';
+
+function setOpen(headEl, open) {
+  var body = document.getElementById(headEl.dataset.target);
+  if (!body) return;
+  body.classList.toggle('hidden', !open);
+  var arrow = headEl.querySelector('.arrow');
+  if (arrow) arrow.innerHTML = open ? '&#9660;' : '&#9654;';
+}
+
+document.querySelectorAll('[data-target]').forEach(function (head) {
+  head.addEventListener('click', function () {
+    var body = document.getElementById(head.dataset.target);
+    setOpen(head, body.classList.contains('hidden'));
+  });
+});
 
 document.getElementById('collapseAll').onclick = function () {
-  document.querySelectorAll('.main .panel-body').forEach(function (b) { b.style.display = 'none'; });
+  document.querySelectorAll('[data-target]').forEach(function (h) { setOpen(h, false); });
 };
 document.getElementById('expandAll').onclick = function () {
-  document.querySelectorAll('.main .panel-body').forEach(function (b) { b.style.display = ''; });
+  document.querySelectorAll('[data-target]').forEach(function (h) { setOpen(h, true); });
 };
 </script>
 </body>

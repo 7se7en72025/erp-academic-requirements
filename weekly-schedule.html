@@ -65,6 +65,7 @@ var body = HOURS.map(function (h) {
 }).join('');
 
 document.getElementById('main-content').innerHTML =
+  idRowHtml() + tabsHtml('Enroll') +
   '<h1 class="page-title">My Weekly Schedule</h1>' +
   '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +
   (enrolled.length === 0

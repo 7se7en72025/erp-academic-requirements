@@ -37,6 +37,7 @@ function render() {
   }
 
   document.getElementById('main-content').innerHTML =
+    idRowHtml() + tabsHtml('Enroll') +
     '<div class="subnav"><span class="current">Enrollment Shopping Cart</span></div>' +
     '<h1 class="page-title">Enrollment Shopping Cart</h1>' +
     '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +

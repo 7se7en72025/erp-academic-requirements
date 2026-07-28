@@ -31,8 +31,7 @@ var rows = cart.map(function (entry) {
 }).join('') || '<tr><td colspan="3" style="text-align:center;color:#666;">No classes were in the cart.</td></tr>';
 
 document.getElementById('main-content').innerHTML =
-  '<ul class="tabs"><li><a href="#">Search</a></li><li class="active"><a href="#">Plan</a></li>' +
-  '<li><a href="#">Enroll</a></li><li><a href="#">My Academics</a></li></ul>' +
+  idRowHtml() + tabsHtml('Plan') +
   '<div class="steps">' +
     '<div class="step done"><span class="circle">1</span> Select classes</div><div class="connector"></div>' +
     '<div class="step done"><span class="circle">2</span> Confirm classes</div><div class="connector"></div>' +

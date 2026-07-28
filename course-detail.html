@@ -71,6 +71,7 @@ function render() {
   var pending = needed.filter(function (t) { return !chosen[t]; });
 
   var html =
+    idRowHtml() + tabsHtml('My Academics') +
     '<div class="subnav"><a href="academic-requirements.html">My Academic Requirements</a>' +
     '<span class="sep">|</span><span class="current">Course Detail</span></div>' +
     '<h1 class="page-title">' + course.code + ' - ' + course.name + '</h1>' +
