@@ -6,7 +6,39 @@
 // Pages' CDN) will happily serve a stale copy of a plain .html URL with no
 // query string, so the same fixed marker is appended everywhere pages link
 // to each other. Bump it whenever chrome.js/data.js/chrome.css change.
-var CACHE_BUST = '_c=5';
+var CACHE_BUST = '_c=6';
+
+// Walkthrough state persists while you navigate between courses -- open a
+// second course and the first still shows in the Registration Course Cart --
+// but a page refresh starts the walkthrough over from an empty cart. The
+// Navigation Timing API is what tells a reload apart from a normal link
+// navigation. Must run before any page reads the cart, and must clear both
+// localStorage and sessionStorage now that getCart()/getEnrolled() fall back
+// to sessionStorage for robustness (see data.js _get/_set).
+(function clearOnReload() {
+  var isReload = false;
+  try {
+    var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
+    if (entries && entries.length) {
+      isReload = entries[0].type === 'reload';
+    } else if (performance.navigation) {
+      isReload = performance.navigation.type === 1;   // deprecated fallback
+    }
+  } catch (e) { /* timing API unavailable; leave state alone */ }
+
+  if (isReload) {
+    try {
+      localStorage.removeItem(CART_KEY);
+      localStorage.removeItem(ENROLLED_KEY);
+      localStorage.removeItem(PENDING_KEY);
+    } catch (e) { /* storage unavailable; nothing to clear */ }
+    try {
+      sessionStorage.removeItem(CART_KEY);
+      sessionStorage.removeItem(ENROLLED_KEY);
+      sessionStorage.removeItem(PENDING_KEY);
+    } catch (e) { /* storage unavailable; nothing to clear */ }
+  }
+})();
 
 var SIDEBAR_ITEMS = [
   { key: 'view-my-classes',       label: 'View My Classes',          href: 'weekly-schedule.html?' + CACHE_BUST },

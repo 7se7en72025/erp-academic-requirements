@@ -7,35 +7,176 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Student Homepage</title>
-<link rel="stylesheet" href="chrome.css?v=5">
+<link rel="stylesheet" href="chrome.css?v=6">
 <style>
-  .tiles { display: flex; flex-wrap: wrap; gap: 20px; padding: 10px 4px; }
-  .tile {
-    width: 170px; height: 130px;
-    border: 1px solid var(--border);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 10px; text-decoration: none; color: #222; font-size: 13px; text-align: center;
-    background: #fafafa;
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+    padding: 14px 2px 30px;
   }
-  .tile:hover { border-color: var(--blue); background: #f0f6fb; }
-  .tile .glyph { font-size: 30px; color: var(--blue); }
-  .intro { color: #444; margin: 10px 0 20px; }
+  .tile {
+    background: #fff;
+    border: 1px solid var(--border-light);
+    border-radius: 2px;
+    padding: 18px 10px 16px;
+    min-height: 168px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    text-align: center;
+    text-decoration: none;
+    color: #222;
+  }
+  a.tile:hover { border-color: var(--blue); box-shadow: 0 1px 6px rgba(0,0,0,.10); }
+  .tile-title { color: var(--blue); font-weight: bold; font-size: 13.5px; line-height: 1.3; }
+  .tile-icon-wrap {
+    position: relative; width: 58px; height: 58px; flex: 1;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tile-icon-wrap svg { width: 100%; height: 100%; display: block; }
+  .badge {
+    position: absolute; width: 19px; height: 19px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: bold; color: #fff; line-height: 1;
+    box-shadow: 0 0 0 2px #fff;
+  }
+  .badge.warn { background: #e8a13c; top: -4px; right: -8px; }
+  .badge.plus { background: var(--green); bottom: -2px; right: -8px; }
+  .badge.edit { background: #d9542f; bottom: -2px; right: -8px; border-radius: 4px; font-size: 10px; }
+  .progress-donut {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: conic-gradient(#d9542f 0% 8%, #e7e0d2 8% 100%);
+    flex: 0 0 auto;
+  }
+  .progress-row { display: flex; align-items: center; gap: 10px; }
+  .progress-note { font-size: 11px; color: #555; text-align: left; }
+  .progress-pct { font-size: 13px; color: #333; }
+  .progress-pct b { color: #d9542f; font-size: 15px; }
+  .oracle-logo {
+    border: 1px solid #b0b0b0; padding: 8px 12px; background: #fff;
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+  }
+  .oracle-logo .o { font-weight: bold; font-size: 13px; letter-spacing: 1.5px; color: #d9542f; }
+  .oracle-logo .p { font-size: 9.5px; letter-spacing: 1.5px; color: #333; }
 </style>
 </head>
 <body>
 <div id="chrome-root"></div>
-<script src="chrome.js?v=5"></script>
+<script src="chrome.js?v=6"></script>
 <script>
   renderChrome({ active: '', pageName: 'Student Homepage' });
-  document.getElementById('main-content').innerHTML =
-    '<p class="intro">Welcome back. Select a tile below to continue.</p>' +
-    '<div class="tiles">' +
-      '<a class="tile" href="academic-requirements.html?_c=5"><span class="glyph">&#128220;</span>Registration</a>' +
-      '<a class="tile" href="shopping-cart.html?_c=5"><span class="glyph">&#128722;</span>Shopping Cart</a>' +
-      '<a class="tile" href="weekly-schedule.html?_c=5"><span class="glyph">&#128197;</span>My Class Schedule</a>' +
-      '<a class="tile" href="#"><span class="glyph">&#128176;</span>Fee Payment</a>' +
-      '<a class="tile" href="#"><span class="glyph">&#127891;</span>Grades</a>' +
-    '</div>';
+
+  function personIcon(head, body) {
+    return '<svg viewBox="0 0 64 64">' +
+      '<circle cx="32" cy="21" r="12" fill="' + head + '"/>' +
+      '<path d="M10 55c0-13 10-22 22-22s22 9 22 22" fill="' + body + '"/>' +
+      '</svg>';
+  }
+
+  var ICONS = {
+    megaphone:
+      '<svg viewBox="0 0 64 64">' +
+        '<path d="M8 26 L26 18 V46 L8 38 Z" fill="#2b2b2b"/>' +
+        '<rect x="5" y="27" width="4" height="9" rx="1" fill="#2b2b2b"/>' +
+        '<path d="M26 18 L46 10 V54 L26 46 Z" fill="#3d3d3d"/>' +
+        '<path d="M16 46 L20 46 L22 58 L14 58 Z" fill="#c0392b"/>' +
+        '<path d="M46 22 q7 6 0 12" stroke="#d9542f" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+        '<path d="M50 16 q13 12 0 24" stroke="#d9542f" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      '</svg>',
+    notepad:
+      '<svg viewBox="0 0 64 64">' +
+        '<rect x="10" y="8" width="40" height="48" rx="2" fill="#fbe8c6" stroke="#c9973f" stroke-width="2"/>' +
+        '<line x1="16" y1="20" x2="44" y2="20" stroke="#5b8bb5" stroke-width="2"/>' +
+        '<line x1="16" y1="28" x2="44" y2="28" stroke="#5b8bb5" stroke-width="2"/>' +
+        '<line x1="16" y1="36" x2="36" y2="36" stroke="#5b8bb5" stroke-width="2"/>' +
+        '<path d="M12 50 L46 16 L52 22 L18 56 Z" fill="#e0a83c" stroke="#8a5a1a" stroke-width="1.5"/>' +
+      '</svg>',
+    document:
+      '<svg viewBox="0 0 64 64">' +
+        '<path d="M14 6h26l10 10v42H14z" fill="#1c5f9e"/>' +
+        '<path d="M40 6v10h10z" fill="#16497c"/>' +
+        '<text x="32" y="43" font-size="22" font-weight="bold" fill="#fff" text-anchor="middle" font-family="Arial">W</text>' +
+      '</svg>',
+    books:
+      '<svg viewBox="0 0 64 64">' +
+        '<rect x="8" y="42" width="48" height="8" rx="1" fill="#c0392b"/>' +
+        '<rect x="10" y="34" width="44" height="8" rx="1" fill="#2f6fa8"/>' +
+        '<rect x="8" y="26" width="48" height="8" rx="1" fill="#e0a83c"/>' +
+        '<path d="M6 20 L32 10 L58 20 L32 28 Z" fill="#1c1c1c"/>' +
+        '<rect x="30" y="26" width="4" height="10" fill="#1c1c1c"/>' +
+      '</svg>',
+    clipboardFinance:
+      '<svg viewBox="0 0 64 64">' +
+        '<rect x="10" y="8" width="38" height="52" rx="3" fill="#d9b98a"/>' +
+        '<rect x="16" y="14" width="26" height="40" fill="#fff"/>' +
+        '<rect x="23" y="2" width="12" height="8" rx="2" fill="#8a6d3b"/>' +
+        '<rect x="20" y="36" width="5" height="13" fill="#1c5f9e"/>' +
+        '<rect x="27" y="30" width="5" height="19" fill="#2f9e41"/>' +
+        '<rect x="34" y="40" width="5" height="9" fill="#e0a83c"/>' +
+        '<circle cx="46" cy="46" r="13" fill="#d9542f"/>' +
+        '<path d="M46 46 L46 34 A12 12 0 0 1 56 52 Z" fill="#1c5f9e"/>' +
+      '</svg>',
+    clipboardCheck:
+      '<svg viewBox="0 0 64 64">' +
+        '<rect x="10" y="8" width="40" height="52" rx="3" fill="#bcd6e6"/>' +
+        '<rect x="16" y="14" width="28" height="40" fill="#fff"/>' +
+        '<rect x="24" y="2" width="12" height="8" rx="2" fill="#7a9db5"/>' +
+        '<path d="M20 34 L28 42 L42 24" stroke="#2f9e6e" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '</svg>',
+    house:
+      '<svg viewBox="0 0 64 64">' +
+        '<path d="M32 8 L58 26 V56 H6 V26 Z" fill="#fff" stroke="#6a4fa0" stroke-width="3"/>' +
+        '<path d="M18 26 L32 16 L46 26" fill="none" stroke="#6a4fa0" stroke-width="3"/>' +
+        '<path d="M14 30 L32 20 L50 30 L32 40 Z" fill="#1c1c1c"/>' +
+      '</svg>'
+  };
+
+  var TILES = [
+    { title: 'Important Notices',        icon: ICONS.megaphone,                     href: '#' },
+    { title: 'Application Forms',        icon: ICONS.notepad,                       href: '#' },
+    { title: 'Academic Progress',         donut: true,                              href: '#' },
+    { title: 'Profile',                  icon: personIcon('#1c3a5e', '#e0a83c'),    href: '#', badge: 'edit' },
+    { title: 'Student Documents',        icon: ICONS.document,                      href: '#' },
+    { title: 'My Academics',             icon: ICONS.books,                         href: '#', badge: 'warn' },
+    { title: 'Registration',             icon: personIcon('#5b3d8a', '#c9973f'),    href: 'academic-requirements.html?_c=6', badge: 'plus' },
+    { title: 'My Finance',               icon: ICONS.clipboardFinance,              href: '#' },
+    { title: 'Acknowledgements',         icon: ICONS.clipboardCheck,                href: '#' },
+    { title: 'Demographic Details',      icon: personIcon('#c9973f', '#8a5a1a'),    href: '#', badge: 'edit' },
+    { title: 'Student Center',           icon: ICONS.house,                        href: '#' },
+    { title: 'Practice School',          oracle: true,                              href: '#' },
+    { title: 'Convocation',              icon: ICONS.books,                         href: '#', badge: 'warn' },
+    { title: 'Student Pre Registration', icon: personIcon('#c9973f', '#7a5a9a'),   href: '#', badge: 'edit' }
+  ];
+
+  var badgeGlyph = { warn: '!', plus: '+', edit: '&#9998;' };
+
+  var tilesHtml = TILES.map(function (t) {
+    var inner;
+    if (t.donut) {
+      inner =
+        '<div class="progress-row">' +
+          '<div class="progress-note">Incomplete <b>1</b></div>' +
+          '<div class="progress-donut"></div>' +
+        '</div>' +
+        '<div class="progress-pct"><b>0%</b> Complete</div>';
+    } else if (t.oracle) {
+      inner = '<div class="oracle-logo"><span class="o">ORACLE</span><span class="p">PEOPLESOFT</span></div>';
+    } else {
+      inner =
+        '<div class="tile-icon-wrap">' + t.icon +
+          (t.badge ? '<span class="badge ' + t.badge + '">' + badgeGlyph[t.badge] + '</span>' : '') +
+        '</div>';
+    }
+    var onclick = t.href === '#' ? ' onclick="return false;"' : '';
+    return '<a class="tile" href="' + t.href + '"' + onclick + '>' +
+      '<div class="tile-title">' + t.title + '</div>' + inner +
+    '</a>';
+  }).join('');
+
+  document.getElementById('main-content').innerHTML = '<div class="tiles">' + tilesHtml + '</div>';
 </script>
 </body>
 </html>
