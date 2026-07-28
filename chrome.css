@@ -236,6 +236,7 @@ table.data td {
 }
 table.data td a { color: var(--link); text-decoration: none; }
 table.data td a:hover { text-decoration: underline; }
+table.data tbody tr:hover td { background: #fdf6d2; }
 .num { text-align: right; }
 .center { text-align: center; }
 
