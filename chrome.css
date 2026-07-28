@@ -168,6 +168,11 @@ html, body {
   background: var(--green); color: #fff; font-size: 10px;
   line-height: 15px; text-align: center; vertical-align: middle;
 }
+.xmark {
+  display: inline-block; width: 15px; height: 15px; border-radius: 50%;
+  background: #c0392b; color: #fff; font-size: 10px;
+  line-height: 15px; text-align: center; vertical-align: middle;
+}
 .diamond {
   display: inline-block; width: 11px; height: 11px;
   background: #e8b425; transform: rotate(45deg); vertical-align: middle;
@@ -323,7 +328,6 @@ table.data tr.picked td { background: #eef7ee; }
   margin: 0 0 22px 8px; font-size: 13.5px; line-height: 1.6;
 }
 .confirm-banner .chk { flex: 0 0 15px; margin-top: 3px; }
-.confirm-banner .xmark { color: #c0392b; font-weight: bold; }
 
 /* ---- PeopleSoft 1-2-3 step chips ---- */
 .stepchips { display: flex; align-items: center; justify-content: flex-end; gap: 0; margin: -26px 0 18px; }
