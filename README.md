@@ -18,6 +18,13 @@ not real data.
 Shared chrome (status bar, header, sidebar) lives in `chrome.css` / `chrome.js`.
 Course catalog and cart/enrollment state (via `localStorage`) live in `data.js`.
 
+**The section data is made up.** Class numbers, timings, rooms and exam dates are
+illustrative, and every instructor is a footballer — so nobody mistakes this for the
+live timetable. Check the real ERP and the official timetable PDF for actual sections.
+
+"Reset walkthrough" at the bottom of the sidebar clears the cart and enrolled classes
+so the flow can be demoed again from the start.
+
 ## Flow
 
 Student Homepage → Registration tile → My Academic Requirements → click a course →

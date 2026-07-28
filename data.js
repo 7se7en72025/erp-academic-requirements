@@ -10,14 +10,15 @@ var STUDENT = {
 var TERM = 'FIRST SEMESTER 2026-2027';
 
 // courseId -> details. Components: L = Lecture, T = Tutorial, P = Lab/Practical.
+// Instructor names are footballers — this is demo data, not a real timetable.
 var COURSES = {
   'CHEMF110': {
     code: 'CHEM F110', name: 'CHEMISTRY LABORATORY', units: 1,
     dept: 'Dept of Chemistry', components: [{ type: 'P', required: true }],
     sections: {
       P: [
-        { id: 'P1', days: 'Tu', time: '2:00PM - 4:50PM', room: 'Chem Lab 1', instructor: 'Instructor A', status: 'open' },
-        { id: 'P2', days: 'We', time: '2:00PM - 4:50PM', room: 'Chem Lab 2', instructor: 'Instructor B', status: 'open' }
+        { id: 'P1', nbr: 1844, days: 'Tu', time: '2:00PM - 4:50PM', room: 'Chem Lab 1', instructor: 'LIONEL MESSI', exam: '', fnan: 'AN', status: 'open' },
+        { id: 'P2', nbr: 1845, days: 'We', time: '2:00PM - 4:50PM', room: 'Chem Lab 2', instructor: 'CRISTIANO RONALDO', exam: '', fnan: 'AN', status: 'open' }
       ]
     }
   },
@@ -25,21 +26,27 @@ var COURSES = {
     code: 'CHEM F111', name: 'GENERAL CHEMISTRY', units: 3,
     dept: 'Dept of Chemistry', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
     sections: {
-      L: [{ id: 'L1', days: 'MoWeFr', time: '9:00AM - 9:50AM', room: 'LT-1', instructor: 'Instructor C', status: 'open' }],
+      L: [
+        { id: 'L1', nbr: 1855, days: 'MoWeFr', time: '9:00AM - 9:50AM', room: 'LT-1', instructor: 'ANDRES INIESTA', exam: '21/12/2026', fnan: 'FN', status: 'open' },
+        { id: 'L2', nbr: 1856, days: 'MoWeFr', time: '12:00PM - 12:50PM', room: 'LT-2', instructor: 'XAVI HERNANDEZ', exam: '21/12/2026', fnan: 'FN', status: 'closed' }
+      ],
       T: [
-        { id: 'T1', days: 'Th', time: '10:00AM - 10:50AM', room: 'Room 201', instructor: 'Instructor C', status: 'open' },
-        { id: 'T2', days: 'Th', time: '11:00AM - 11:50AM', room: 'Room 202', instructor: 'Instructor D', status: 'open' }
+        { id: 'T1', nbr: 1860, days: 'Th', time: '10:00AM - 10:50AM', room: 'Room 201', instructor: 'SERGIO BUSQUETS', exam: '', fnan: '', status: 'open' },
+        { id: 'T2', nbr: 1861, days: 'Sa', time: '8:00AM - 8:50AM', room: 'Room 202', instructor: 'CARLES PUYOL', exam: '', fnan: '', status: 'open' }
       ]
     }
   },
   'EEEF111': {
     code: 'EEE F111', name: 'ELECTRICAL SCIENCES', units: 3,
-    dept: 'Dept of EEE', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
+    dept: 'Dept of Electrical & Elec Engg', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
     sections: {
-      L: [{ id: 'L1', days: 'MoWeFr', time: '11:00AM - 11:50AM', room: 'LT-2', instructor: 'Instructor E', status: 'open' }],
+      L: [
+        { id: 'L1', nbr: 1877, days: 'TuThSa', time: '9:00AM - 9:50AM', room: 'LT-3', instructor: 'KEVIN DE BRUYNE', exam: '14/12/2026', fnan: 'AN', status: 'open' },
+        { id: 'L2', nbr: 1878, days: 'TuThSa', time: '11:00AM - 11:50AM', room: 'LT-4', instructor: 'ERLING HAALAND', exam: '14/12/2026', fnan: 'AN', status: 'closed' }
+      ],
       T: [
-        { id: 'T1', days: 'Mo', time: '4:00PM - 4:50PM', room: 'Room 105', instructor: 'Instructor E', status: 'open' },
-        { id: 'T2', days: 'Tu', time: '4:00PM - 4:50PM', room: 'Room 106', instructor: 'Instructor F', status: 'closed' }
+        { id: 'T1', nbr: 1885, days: 'Mo', time: '4:00PM - 4:50PM', room: 'Room 105', instructor: 'PHIL FODEN', exam: '', fnan: '', status: 'open' },
+        { id: 'T2', nbr: 1886, days: 'Tu', time: '4:00PM - 4:50PM', room: 'Room 106', instructor: 'RODRI HERNANDEZ', exam: '', fnan: '', status: 'closed' }
       ]
     }
   },
@@ -47,21 +54,26 @@ var COURSES = {
     code: 'MATH F111', name: 'MATHEMATICS I', units: 3,
     dept: 'Dept of Mathematics', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
     sections: {
-      L: [{ id: 'L1', days: 'MoWeFr', time: '8:00AM - 8:50AM', room: 'LT-3', instructor: 'Instructor G', status: 'open' }],
+      L: [
+        { id: 'L1', nbr: 1901, days: 'MoWeFr', time: '8:00AM - 8:50AM', room: 'LT-5', instructor: 'LUKA MODRIC', exam: '07/12/2026', fnan: 'FN', status: 'open' }
+      ],
       T: [
-        { id: 'T1', days: 'We', time: '3:00PM - 3:50PM', room: 'Room 301', instructor: 'Instructor G', status: 'open' },
-        { id: 'T2', days: 'We', time: '4:00PM - 4:50PM', room: 'Room 302', instructor: 'Instructor H', status: 'wait' }
+        { id: 'T1', nbr: 1910, days: 'We', time: '3:00PM - 3:50PM', room: 'Room 301', instructor: 'TONI KROOS', exam: '', fnan: '', status: 'open' },
+        { id: 'T2', nbr: 1911, days: 'We', time: '4:00PM - 4:50PM', room: 'Room 302', instructor: 'KARIM BENZEMA', exam: '', fnan: '', status: 'wait' }
       ]
     }
   },
   'MEF112': {
     code: 'ME F112', name: 'WORKSHOP PRACTICE', units: 2,
-    dept: 'Dept of Mech Engg', components: [{ type: 'L', required: true }, { type: 'P', required: true }],
+    dept: 'Dept of Mechanical Engg', components: [{ type: 'L', required: true }, { type: 'P', required: true }],
     sections: {
-      L: [{ id: 'L1', days: 'Tu', time: '8:00AM - 8:50AM', room: 'LT-4', instructor: 'Instructor I', status: 'open' }],
+      L: [
+        { id: 'L1', nbr: 2730, days: 'Th', time: '8:00AM - 8:50AM', room: 'LT-6', instructor: 'VIRGIL VAN DIJK', exam: '', fnan: '', status: 'open' }
+      ],
       P: [
-        { id: 'P1', days: 'Fr', time: '2:00PM - 4:50PM', room: 'Workshop 1', instructor: 'Instructor I', status: 'open' },
-        { id: 'P2', days: 'Sa', time: '9:00AM - 11:50AM', room: 'Workshop 2', instructor: 'Instructor J', status: 'open' }
+        { id: 'P1', nbr: 2736, days: 'Fr', time: '9:00AM - 11:50AM', room: 'Workshop 1', instructor: 'MOHAMED SALAH', exam: '', fnan: '', status: 'open' },
+        { id: 'P2', nbr: 2737, days: 'Tu', time: '12:00PM - 2:50PM', room: 'Workshop 2', instructor: 'TRENT ALEXANDER-ARNOLD', exam: '', fnan: '', status: 'closed' },
+        { id: 'P3', nbr: 2738, days: 'Mo', time: '9:00AM - 11:50AM', room: 'Workshop 1', instructor: 'ALISSON BECKER', exam: '', fnan: '', status: 'closed' }
       ]
     }
   },
@@ -70,8 +82,8 @@ var COURSES = {
     dept: 'Dept of Physics', components: [{ type: 'P', required: true }],
     sections: {
       P: [
-        { id: 'P1', days: 'Mo', time: '2:00PM - 4:50PM', room: 'Physics Lab 1', instructor: 'Instructor K', status: 'open' },
-        { id: 'P2', days: 'Th', time: '2:00PM - 4:50PM', room: 'Physics Lab 2', instructor: 'Instructor L', status: 'open' }
+        { id: 'P1', nbr: 1920, days: 'Mo', time: '2:00PM - 4:50PM', room: 'Physics Lab 1', instructor: 'NEYMAR JR', exam: '', fnan: 'AN', status: 'open' },
+        { id: 'P2', nbr: 1921, days: 'Th', time: '2:00PM - 4:50PM', room: 'Physics Lab 2', instructor: 'KYLIAN MBAPPE', exam: '', fnan: 'AN', status: 'open' }
       ]
     }
   },
@@ -79,10 +91,12 @@ var COURSES = {
     code: 'PHY F111', name: 'MECH OSCILLATIONS & WAVE', units: 3,
     dept: 'Dept of Physics', components: [{ type: 'L', required: true }, { type: 'T', required: true }],
     sections: {
-      L: [{ id: 'L1', days: 'MoWeFr', time: '10:00AM - 10:50AM', room: 'LT-5', instructor: 'Instructor M', status: 'open' }],
+      L: [
+        { id: 'L1', nbr: 1930, days: 'MoWeFr', time: '10:00AM - 10:50AM', room: 'LT-7', instructor: 'ZINEDINE ZIDANE', exam: '10/12/2026', fnan: 'FN', status: 'open' }
+      ],
       T: [
-        { id: 'T1', days: 'Sa', time: '10:00AM - 10:50AM', room: 'Room 401', instructor: 'Instructor M', status: 'open' },
-        { id: 'T2', days: 'Sa', time: '11:00AM - 11:50AM', room: 'Room 402', instructor: 'Instructor N', status: 'open' }
+        { id: 'T1', nbr: 1940, days: 'Sa', time: '10:00AM - 10:50AM', room: 'Room 401', instructor: 'RONALDINHO GAUCHO', exam: '', fnan: '', status: 'open' },
+        { id: 'T2', nbr: 1941, days: 'Sa', time: '11:00AM - 11:50AM', room: 'Room 402', instructor: 'THIERRY HENRY', exam: '', fnan: '', status: 'open' }
       ]
     }
   }

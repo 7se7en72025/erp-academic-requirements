@@ -21,6 +21,7 @@ var course = COURSES[courseId];
 var chosen = {}; // type -> section object
 
 var COMP_NAME = { L: 'Lecture', T: 'Tutorial', P: 'Laboratory' };
+var COMP_ABBR = { L: 'LEC', T: 'TUT', P: 'LAB' };
 
 function statusDot(status) {
   var cls = status === 'open' ? 'open' : status === 'wait' ? 'wait' : 'closed';
@@ -32,17 +33,24 @@ function sectionTable(type) {
   var secs = course.sections[type] || [];
   var rows = secs.map(function (s) {
     var disabled = s.status === 'closed' ? 'disabled' : '';
-    return '<tr>' +
-      '<td>' + s.id + ' (' + COMP_NAME[type] + ')</td>' +
-      '<td>' + s.days + '</td><td>' + s.time + '</td><td>' + s.room + '</td>' +
-      '<td>' + s.instructor + '</td><td>' + statusDot(s.status) + '</td>' +
-      '<td><button class="ps-btn" ' + disabled + ' onclick="selectSection(\'' + type + '\',\'' + s.id + '\')">Select</button></td>' +
+    var picked = chosen[type] && chosen[type].id === s.id;
+    return '<tr' + (picked ? ' style="background:#eef7ee;"' : '') + '>' +
+      '<td>' + s.nbr + '</td>' +
+      '<td>' + s.id + '-' + COMP_ABBR[type] + '</td>' +
+      '<td>' + s.days + ' ' + s.time + '</td><td>' + s.room + '</td>' +
+      '<td>' + s.instructor + '</td>' +
+      '<td>' + (s.exam || '') + '</td><td>' + (s.fnan || '') + '</td>' +
+      '<td>' + statusDot(s.status) + '</td>' +
+      '<td><button class="ps-btn slim" ' + disabled + ' onclick="selectSection(\'' + type + '\',\'' + s.id + '\')">' +
+        (picked ? 'Selected' : 'Select') + '</button></td>' +
       '</tr>';
   }).join('');
   return '<div class="panel">' +
-    '<div class="panel-title">Select ' + COMP_NAME[type] + ' Section' + (course.components.find(function(c){return c.type===type;}).required ? ' (Required)' : '') + '</div>' +
+    '<div class="panel-title">Select ' + COMP_NAME[type] + ' section' +
+      (course.components.find(function(c){return c.type===type;}).required ? ' (Required):' : ':') + '</div>' +
     '<div class="grid-scroll"><table class="data">' +
-      '<thead><tr><th>Section</th><th>Days</th><th>Time</th><th>Room</th><th>Instructor</th><th>Status</th><th></th></tr></thead>' +
+      '<thead><tr><th>Class Nbr</th><th>Section</th><th>Schedule</th><th>Room</th>' +
+      '<th>Instructor</th><th>Exam Date</th><th>FN/AN</th><th>Status</th><th></th></tr></thead>' +
       '<tbody>' + rows + '</tbody>' +
     '</table></div></div>';
 }

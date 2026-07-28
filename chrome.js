@@ -51,9 +51,19 @@ function renderChrome(opts) {
       '</div>' +
     '</header>' +
     '<div class="shell">' +
-      '<nav class="sidebar">' + items + '</nav>' +
+      '<nav class="sidebar">' + items +
+        '<a class="side-item reset" href="#" onclick="resetDemo(); return false;">' +
+          '<span class="side-icon">&#8635;</span>Reset walkthrough</a>' +
+      '</nav>' +
       '<main class="main" id="main-content"></main>' +
     '</div>';
+}
+
+// Clears the demo cart/enrollment so the walkthrough can be run again.
+function resetDemo() {
+  localStorage.removeItem(CART_KEY);
+  localStorage.removeItem(ENROLLED_KEY);
+  location.href = 'academic-requirements.html';
 }
 
 // Standard student/ID/go-to row used on the academic pages.

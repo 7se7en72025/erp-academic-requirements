@@ -89,6 +89,8 @@ html, body {
 }
 .sidebar a.side-item:hover { background: #f6f6f6; }
 .sidebar a.side-item.active { background: var(--active-bg); font-weight: bold; }
+.sidebar a.side-item.reset { color: #777; font-size: 13px; border-bottom: none; }
+.sidebar a.side-item.reset .side-icon { font-size: 16px; text-align: center; line-height: 20px; }
 .sidebar .side-icon { width: 20px; height: 20px; flex: 0 0 20px; color: #2f6fa8; }
 .sidebar .side-icon svg { width: 100%; height: 100%; display: block; }
 
