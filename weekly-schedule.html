@@ -7,12 +7,12 @@
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My Weekly Schedule</title>
-<link rel="stylesheet" href="chrome.css?v=4">
+<link rel="stylesheet" href="chrome.css?v=5">
 </head>
 <body>
 <div id="chrome-root"></div>
-<script src="data.js?v=4"></script>
-<script src="chrome.js?v=4"></script>
+<script src="data.js?v=5"></script>
+<script src="chrome.js?v=5"></script>
 <script>
 renderChrome({ active: 'view-my-classes', pageName: 'Registration' });
 
@@ -84,7 +84,7 @@ function render() {
   var body;
   if (!enrolled.length) {
     body = '<p style="margin-left:8px;">You are not registered for classes in this term. ' +
-      '<a href="academic-requirements.html?_c=4">Go register</a>.</p>';
+      '<a href="academic-requirements.html?_c=5">Go register</a>.</p>';
   } else if (view === 'list') {
     body = '<div class="req-sub">Schedule</div>' + listView();
   } else {
@@ -106,7 +106,7 @@ function render() {
   document.getElementById('main-content').innerHTML =
     idRowHtml() + tabsHtml('Enroll') +
     '<div class="subnav"><span class="current">My Class Schedule</span>' +
-      '<span class="sep">|</span><a href="academic-requirements.html?_c=4">Add</a>' +
+      '<span class="sep">|</span><a href="academic-requirements.html?_c=5">Add</a>' +
       '<span class="sep">|</span><a href="#">Swap</a>' +
       '<span class="sep">|</span><a href="#">Term Information</a></div>' +
     '<h1 class="page-title">My Class Schedule</h1>' +
