@@ -13,10 +13,46 @@
 <script>
 renderChrome({ active: 'shopping-cart', pageName: 'Registration' });
 
-// Validate is a dry run: it reports on the cart without enrolling anything.
-var rows = getCart().map(function (e) {
+// Validate is a dry run: it reports on the cart (plus anything already
+// enrolled) without adding anything. Each course's sections are checked for
+// a meeting-time overlap against every other course in the cart/schedule.
+var cart = getCart();
+var everything = getEnrolled().concat(cart);
+
+function courseBlocks(entry) {
+  return scheduleBlocks([entry]);
+}
+
+function findClash(entry) {
+  var mine = courseBlocks(entry);
+  for (var i = 0; i < everything.length; i++) {
+    var other = everything[i];
+    if (other.courseId === entry.courseId) continue;
+    var theirs = courseBlocks(other);
+    for (var a = 0; a < mine.length; a++) {
+      for (var b = 0; b < theirs.length; b++) {
+        var m = mine[a], t = theirs[b];
+        if (m.day === t.day && m.start < t.end && t.start < m.end) {
+          return { mineNbr: m.sec.nbr, otherNbr: t.sec.nbr };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+var rows = cart.map(function (e) {
   var c = COURSES[e.courseId];
   var parts = c.code.split(' ');
+  var clash = findClash(e);
+  if (clash) {
+    return '<tr><td>' + parts[0] + '</td><td>' + parts[1] + '</td>' +
+      '<td>There is a time conflict for class number ' + clash.mineNbr + ' and class number ' +
+      clash.otherNbr + '. There is currently a meeting time conflict for two of your shopping ' +
+      'cart classes or a shopping cart class and one of your enrolled classes for this term. ' +
+      'Use the class numbers to check the meeting times.</td>' +
+      '<td class="center"><span class="xmark">&#10008;</span></td></tr>';
+  }
   return '<tr><td>' + parts[0] + '</td><td>' + parts[1] + '</td>' +
     '<td>OK to Add</td>' +
     '<td class="center"><span class="chk">&#10003;</span></td></tr>';

@@ -96,7 +96,8 @@ document.getElementById('main-content').innerHTML =
         '<button class="ps-btn" onclick="selectAll()">Select All</button>' +
         '<span>for selected</span>' +
         '<button class="ps-btn" onclick="deleteSelected()">Delete</button>' +
-        '<button class="ps-btn primary" onclick="validate()">Validate</button>' +
+        '<button class="ps-btn" onclick="validate()">Validate</button>' +
+        '<button class="ps-btn primary" onclick="enroll()">Enroll</button>' +
       '</div>' +
     '</div>' +
   '</div>' +
@@ -119,6 +120,11 @@ function deleteSelected() {
 function validate() {
   if (!getCart().length) { alert('Your shopping cart is empty.'); return; }
   location.href = 'validate-results.html';
+}
+
+function enroll() {
+  if (!getCart().length) { alert('Your shopping cart is empty.'); return; }
+  location.href = 'enroll-results.html';
 }
 </script>
 </body>
