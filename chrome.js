@@ -4,7 +4,6 @@
 
 var SIDEBAR_ITEMS = [
   { key: 'view-my-classes',       label: 'View My Classes',          href: 'weekly-schedule.html' },
-  { key: 'academic-requirements', label: 'My Academic Requirements', href: 'academic-requirements.html' },
   { key: 'add-classes',           label: 'Enrollment:  Add Classes', href: 'enroll-results.html' },
   { key: 'swap-classes',          label: 'Enrollment:  Swap Classes', href: '#' },
   { key: 'shopping-cart',         label: 'Enrollment Shopping Cart', href: 'shopping-cart.html' }
@@ -43,21 +42,29 @@ function renderChrome(opts) {
       '</div>' +
     '</header>' +
     '<div class="shell">' +
-      '<nav class="sidebar">' + items +
-        '<a class="side-item reset" href="#" onclick="resetDemo(); return false;">' +
-          '<span class="side-icon">&#8635;</span>Reset walkthrough</a>' +
-      '</nav>' +
+      '<nav class="sidebar">' + items + '</nav>' +
       '<main class="main" id="main-content"></main>' +
     '</div>';
 }
 
 // Clears the demo cart/enrollment so the walkthrough can be run again.
+// Triggered by Ctrl+X; there is no longer a sidebar entry for it.
 function resetDemo() {
   localStorage.removeItem(CART_KEY);
   localStorage.removeItem(ENROLLED_KEY);
   localStorage.removeItem(PENDING_KEY);
   location.href = 'academic-requirements.html';
 }
+
+// Ctrl+X resets the walkthrough. Ignored while typing in a field so the
+// browser's own cut still works there.
+document.addEventListener('keydown', function (ev) {
+  if (!(ev.ctrlKey || ev.metaKey) || ev.key !== 'x') return;
+  var el = document.activeElement;
+  if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+  ev.preventDefault();
+  if (confirm('Reset the walkthrough? This clears your cart and enrolled classes.')) resetDemo();
+});
 
 // Standard student/ID/go-to row used on the academic pages.
 function idRowHtml() {
