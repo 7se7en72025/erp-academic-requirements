@@ -1,0 +1,182 @@
+body {
+  margin: 0;
+  background: #fff;
+  color: #333;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+}
+
+.page {
+  max-width: 1000px;
+  padding: 12px 20px 60px;
+}
+
+/* ---- top bar ---- */
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  padding: 6px 0 10px;
+  flex-wrap: wrap;
+}
+.app-title { font-size: 15px; color: #555; letter-spacing: .3px; }
+.id-label { font-size: 13px; color: #333; }
+.goto { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.goto select {
+  width: 200px;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 2px;
+  border: 1px solid #9a9a9a;
+}
+.go-btn {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 1px solid #7a93b5;
+  background: linear-gradient(#eaf1f9, #b9cde3);
+  color: #24486f;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ---- tabs ---- */
+.tabs {
+  list-style: none;
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  padding: 0 0 0 2px;
+  border-bottom: 1px solid #c8c8c8;
+}
+.tabs li a {
+  display: block;
+  padding: 5px 14px;
+  font-size: 12px;
+  color: #4a4a4a;
+  text-decoration: none;
+  border: 1px solid #c8c8c8;
+  border-bottom: none;
+  background: #f3f3f3;
+  border-radius: 3px 3px 0 0;
+}
+.tabs li.active a {
+  background: #fff;
+  color: #1f5c99;
+  font-weight: bold;
+  position: relative;
+  top: 1px;
+}
+
+/* ---- headings ---- */
+.page-title {
+  font-size: 17px;
+  font-weight: normal;
+  color: #4a6b8a;
+  margin: 22px 0 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #d5d5d5;
+  max-width: 840px;
+}
+.breadcrumb { color: #555; margin: 16px 0; }
+.generated { margin: 16px 0 18px 40px; }
+.generated span { margin-left: 14px; }
+
+/* ---- buttons ---- */
+.btn-row { display: flex; gap: 44px; margin: 0 0 14px 8px; flex-wrap: wrap; }
+.ps-btn {
+  min-width: 205px;
+  padding: 5px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  color: #333;
+  background: #fbdfa2;
+  border: 1px solid #c9a15a;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.ps-btn:hover { background: #fbeac4; }
+
+/* ---- legend ---- */
+.legend {
+  display: flex;
+  gap: 90px;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #d5d5d5;
+  max-width: 880px;
+  margin: 0 0 16px 8px;
+}
+.ic { font-style: normal; margin-right: 6px; }
+.ic.taken { color: #2e9b3c; }
+.ic.prog  { color: #e8b425; }
+.ic.plan  { color: #3b6fbf; }
+
+/* ---- groups ---- */
+.group { max-width: 880px; margin-left: 8px; }
+.group-head {
+  color: #b35c00;
+  font-weight: bold;
+  padding: 6px 10px;
+  cursor: default;
+}
+.group-head.section {
+  background: #ededed;
+  border: 1px solid #d0d0d0;
+  font-size: 14px;
+  cursor: pointer;
+}
+.group-head.sub {
+  background: #fbf0dc;
+  border: 1px solid #e6d3ae;
+  margin: 14px 0 0 20px;
+}
+.group-head[data-toggle] { cursor: pointer; }
+.arrow { display: inline-block; width: 14px; color: #a06a2c; }
+.group-head.collapsed .arrow { transform: rotate(-90deg); }
+
+.group-body { padding-left: 20px; }
+.group-body.hidden { display: none; }
+
+.status { margin: 16px 0 16px 22px; }
+.reqs { margin: 0 0 18px 60px; padding: 0; }
+.reqs li { margin: 4px 0; }
+
+/* ---- grid ---- */
+.grid { margin: 0 0 20px 26px; border: 1px solid #d9c39a; }
+.grid-title {
+  color: #b35c00;
+  font-weight: bold;
+  padding: 6px 8px;
+  background: #fff;
+  border-bottom: 1px solid #d9c39a;
+}
+.grid-nav {
+  text-align: center;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: #f7f7f7;
+  border-bottom: 1px solid #d0d0d0;
+}
+.grid-nav a { color: #1f5c99; }
+.grid-nav .pager { margin-left: 30px; }
+.grid-nav .pg, .grid-nav .dl { color: #7c93ad; margin: 0 4px; }
+
+.grid-scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 620px; }
+th {
+  background: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  text-align: left;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+td {
+  border: 1px solid #d8d8d8;
+  padding: 6px 8px;
+  vertical-align: middle;
+}
+td a { color: #1f5c99; text-decoration: none; }
+td a:hover { text-decoration: underline; }
+.num { text-align: right; }
