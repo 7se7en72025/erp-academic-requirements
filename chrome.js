@@ -2,11 +2,17 @@
 // Pages call renderChrome({ active: '<key>', pageName: 'My Academics' })
 // into <div id="chrome-root"></div>, then fill #main-content.
 
+// Every href below carries ?_c=2 as a cache-buster: browsers (and GitHub
+// Pages' CDN) will happily serve a stale copy of a plain .html URL with no
+// query string, so the same fixed marker is appended everywhere pages link
+// to each other. Bump it whenever chrome.js/data.js/chrome.css change.
+var CACHE_BUST = '_c=2';
+
 var SIDEBAR_ITEMS = [
-  { key: 'view-my-classes',       label: 'View My Classes',          href: 'weekly-schedule.html' },
-  { key: 'add-classes',           label: 'Enrollment:  Add Classes', href: 'enroll-results.html' },
+  { key: 'view-my-classes',       label: 'View My Classes',          href: 'weekly-schedule.html?' + CACHE_BUST },
+  { key: 'add-classes',           label: 'Enrollment:  Add Classes', href: 'enroll-results.html?' + CACHE_BUST },
   { key: 'swap-classes',          label: 'Enrollment:  Swap Classes', href: '#' },
-  { key: 'shopping-cart',         label: 'Enrollment Shopping Cart', href: 'shopping-cart.html' }
+  { key: 'shopping-cart',         label: 'Enrollment Shopping Cart', href: 'shopping-cart.html?' + CACHE_BUST }
 ];
 
 var SIDEBAR_ICON =
@@ -31,10 +37,10 @@ function renderChrome(opts) {
     '<div class="topline"></div>' +
     '<div class="sisprd">' + (opts.instance || '11120241312  -  SISPRD') + '</div>' +
     '<header class="appheader">' +
-      '<a class="home-link" href="student-homepage.html">&#8249; Student Homepage</a>' +
+      '<a class="home-link" href="student-homepage.html?' + CACHE_BUST + '">&#8249; Student Homepage</a>' +
       '<div class="page-name">' + (opts.pageName || 'Registration') + '</div>' +
       '<div class="icons">' +
-        '<a title="Home" href="student-homepage.html">&#8962;</a>' +
+        '<a title="Home" href="student-homepage.html?' + CACHE_BUST + '">&#8962;</a>' +
         '<a title="Search" href="#">&#9906;</a>' +
         '<a title="Notifications" href="#">&#128276;</a>' +
         '<a title="Actions" href="#">&#8942;</a>' +
@@ -53,7 +59,7 @@ function resetDemo() {
   localStorage.removeItem(CART_KEY);
   localStorage.removeItem(ENROLLED_KEY);
   localStorage.removeItem(PENDING_KEY);
-  location.href = 'academic-requirements.html';
+  location.href = 'academic-requirements.html?' + CACHE_BUST;
 }
 
 // Ctrl+X resets the walkthrough. Ignored while typing in a field so the
