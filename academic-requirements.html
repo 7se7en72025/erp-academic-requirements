@@ -20,7 +20,9 @@ var enrolledIds = getEnrolled().map(function (e) { return e.courseId; });
 var cartIds = getCart().map(function (c) { return c.courseId; });
 
 function whenCell(id) {
-  return enrolledIds.indexOf(id) > -1 ? TERM : '';
+  if (enrolledIds.indexOf(id) > -1) return TERM;
+  if (cartIds.indexOf(id) > -1) return TERM;
+  return '';
 }
 function statusCell(id) {
   if (enrolledIds.indexOf(id) > -1) return '<span class="chk">&#10003;</span>';

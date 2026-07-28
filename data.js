@@ -143,12 +143,33 @@ var PROGRAM = {
   ]
 };
 
-// ---- cart / enrollment persisted in localStorage so the flow feels real across pages ----
+// ---- robust persistence: try localStorage first, fall back to sessionStorage ----
 var CART_KEY = 'erp_demo_cart';
 var ENROLLED_KEY = 'erp_demo_enrolled';
+var PENDING_KEY = 'erp_demo_pending';
 
-function getCart() { return JSON.parse(localStorage.getItem(CART_KEY) || '[]'); }
-function saveCart(cart) { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
+function _get(key, fallback) {
+  var raw = null;
+  try { raw = localStorage.getItem(key); } catch (e) {}
+  if (raw === null || raw === undefined) {
+    try { raw = sessionStorage.getItem(key); } catch (e) {}
+  }
+  if (raw === null || raw === undefined) return fallback;
+  try { return JSON.parse(raw); } catch (e) { return fallback; }
+}
+function _set(key, val) {
+  var s = JSON.stringify(val);
+  try { localStorage.setItem(key, s); } catch (e) {}
+  try { sessionStorage.setItem(key, s); } catch (e) {}
+}
+function _remove(key) {
+  try { localStorage.removeItem(key); } catch (e) {}
+  try { sessionStorage.removeItem(key); } catch (e) {}
+}
+
+// ---- cart / enrollment ----
+function getCart() { return _get(CART_KEY, []); }
+function saveCart(cart) { _set(CART_KEY, cart); }
 function addToCart(entry) {
   var cart = getCart().filter(function (c) { return c.courseId !== entry.courseId; });
   cart.push(entry);
@@ -158,15 +179,14 @@ function removeFromCart(courseId) {
   saveCart(getCart().filter(function (c) { return c.courseId !== courseId; }));
 }
 
-function getEnrolled() { return JSON.parse(localStorage.getItem(ENROLLED_KEY) || '[]'); }
-function saveEnrolled(list) { localStorage.setItem(ENROLLED_KEY, JSON.stringify(list)); }
+function getEnrolled() { return _get(ENROLLED_KEY, []); }
+function saveEnrolled(list) { _set(ENROLLED_KEY, list); }
 
-// In-progress "add to cart" selection, carried across the Related Class Sections
+// In-progress "add to cart" selection, carried across Related Class Sections
 // and Enrollment Preferences screens. Shape: { courseId, sections: { L: id, T: id } }
-var PENDING_KEY = 'erp_demo_pending';
-function getPending() { return JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); }
-function savePending(p) { localStorage.setItem(PENDING_KEY, JSON.stringify(p)); }
-function clearPending() { localStorage.removeItem(PENDING_KEY); }
+function getPending() { return _get(PENDING_KEY, null); }
+function savePending(p) { _set(PENDING_KEY, p); }
+function clearPending() { _remove(PENDING_KEY); }
 
 // ---- component vocabulary ----
 var COMP_NAME = { L: 'Lecture', T: 'Tutorial', P: 'Laboratory' };

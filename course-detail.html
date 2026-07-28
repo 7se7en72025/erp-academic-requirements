@@ -22,11 +22,13 @@ var course = COURSES[courseId];
 var justAdded = params.get('added');
 var showSections = params.get('sections') === '1';
 
-// The "added to cart" confirmation is a modal the first time this page loads
-// after Enrollment Preferences; strip the flag so a refresh doesn't re-show it.
+// The "added to cart" confirmation is a banner + modal the first time this page loads
+// after Enrollment Preferences; strip the flags so a refresh doesn't re-show them.
 var showModal = params.get('modal') === '1';
-if (showModal) {
-  params.delete('modal');
+var showBanner = params.get('added') === '1';
+if (showModal || showBanner) {
+  if (showModal) params.delete('modal');
+  if (showBanner) params.delete('added');
   var qs = params.toString();
   history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
 }
@@ -104,12 +106,16 @@ function closeAddedModal() {
 }
 
 function render() {
+  var cartEntry = getCart().find(function (c) { return c.courseId === courseId; });
+  var isFilled = !!cartEntry;
+  var visibleSections = showSections || isFilled;
+
   document.getElementById('main-content').innerHTML =
     idRowHtml() + tabsHtml('My Academics') +
-    '<div class="subnav"><a href="academic-requirements.html?_c=5">My Academic Requirements</a></div>' +
+    '<div class="subnav"><a href="academic-requirements.html">My Academic Requirements</a></div>' +
     '<h1 class="page-title">Course Detail</h1>' +
     bannerHtml() +
-    '<p><a href="academic-requirements.html?_c=5">Return to My Academic Requirements</a></p>' +
+    '<p><a href="academic-requirements.html">Return to My Academic Requirements</a></p>' +
     '<p class="breadcrumb">' + course.code + ' - ' + course.name + '</p>' +
     '<div class="panel"><div class="panel-title">Course Detail</div><div class="panel-body">' +
       '<div class="twoup" style="margin:0;">' +
@@ -125,7 +131,8 @@ function render() {
           '<p><strong>Academic Group</strong> &nbsp; ' + course.acadGroup + '</p>' +
           '<p><strong>Academic Organization</strong> &nbsp; ' + course.dept + '</p>' +
         '</div>' +
-        '<div><button class="ps-btn" onclick="reveal()">View Class Sections</button></div>' +
+        '<div><button class="ps-btn" onclick="reveal()">' +
+          (isFilled ? 'View/Edit Sections' : 'View Class Sections') + '</button></div>' +
       '</div>' +
     '</div></div>' +
     '<h2 class="page-title">Course Schedule</h2>' +
@@ -134,10 +141,10 @@ function render() {
         '<select><option>' + TERM + '</option></select></label>' +
       '<button class="ps-btn" onclick="reveal()">Show Sections</button>' +
     '</div>' +
-    '<div id="sectionsArea">' + (showSections ? sectionsHtml() : '') + '</div>' +
-    '<p><a href="academic-requirements.html?_c=5">Return to My Academic Requirements</a></p>' +
-    '<p class="go-top"><a href="#">Go to top</a></p>' +
-    addedModalHtml();
+    '<div id="sectionsArea">' + (visibleSections ? sectionsHtml() : '') + '</div>' +
+    addedModalHtml() +
+    '<p><a href="academic-requirements.html">Return to My Academic Requirements</a></p>' +
+    '<p class="go-top"><a href="#">Go to top</a></p>';
 }
 
 function reveal() {

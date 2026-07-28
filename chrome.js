@@ -8,31 +8,6 @@
 // to each other. Bump it whenever chrome.js/data.js/chrome.css change.
 var CACHE_BUST = '_c=5';
 
-// Walkthrough state persists while you navigate between courses -- open a
-// second course and the first still shows in the Registration Course Cart --
-// but a page refresh starts the walkthrough over from an empty cart. The
-// Navigation Timing API is what tells a reload apart from a normal link
-// navigation. Runs at load time, before any page reads the cart.
-(function clearOnReload() {
-  var isReload = false;
-  try {
-    var entries = performance.getEntriesByType && performance.getEntriesByType('navigation');
-    if (entries && entries.length) {
-      isReload = entries[0].type === 'reload';
-    } else if (performance.navigation) {
-      isReload = performance.navigation.type === 1;   // deprecated fallback
-    }
-  } catch (e) { /* timing API unavailable; leave state alone */ }
-
-  if (isReload) {
-    try {
-      localStorage.removeItem(CART_KEY);
-      localStorage.removeItem(ENROLLED_KEY);
-      localStorage.removeItem(PENDING_KEY);
-    } catch (e) { /* storage unavailable; nothing to clear */ }
-  }
-})();
-
 var SIDEBAR_ITEMS = [
   { key: 'view-my-classes',       label: 'View My Classes',          href: 'weekly-schedule.html?' + CACHE_BUST },
   { key: 'add-classes',           label: 'Enrollment:  Add Classes', href: 'enroll-results.html?' + CACHE_BUST },
@@ -84,6 +59,9 @@ function resetDemo() {
   localStorage.removeItem(CART_KEY);
   localStorage.removeItem(ENROLLED_KEY);
   localStorage.removeItem(PENDING_KEY);
+  sessionStorage.removeItem(CART_KEY);
+  sessionStorage.removeItem(ENROLLED_KEY);
+  sessionStorage.removeItem(PENDING_KEY);
   location.href = 'academic-requirements.html?' + CACHE_BUST;
 }
 
@@ -186,7 +164,9 @@ function schedulePanelsHtml() {
   return '<div class="twoup">' +
     '<div class="panel"><div class="panel-title">My Class Schedule</div>' +
       '<div class="panel-body">' + lines(enrolled, 'You are not registered for classes in this term.') + '</div></div>' +
-    '<div class="panel"><div class="panel-title">Registration Course Cart</div>' +
+    '<div class="panel"><div class="panel-title">Registration Course Cart' +
+      (cart.length ? ' <button class="ps-btn slim" style="min-width:0;margin-left:8px;font-size:11px;padding:2px 10px;" onclick="location.href=\'shopping-cart.html?' + CACHE_BUST + '\'">Show All</button>' : '') +
+      '</div>' +
       '<div class="panel-body">' + lines(cart, 'Your shopping cart is empty.') + '</div></div>' +
   '</div>';
 }
