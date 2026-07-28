@@ -239,11 +239,18 @@ table.data td a:hover { text-decoration: underline; }
 .num { text-align: right; }
 .center { text-align: center; }
 
-/* ---- section status dots (enroll pages) ---- */
-.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
-.dot.open { background: var(--green); }
-.dot.closed { background: #c0392b; }
-.dot.wait { background: #e8b425; }
+/* ---- section status glyphs ----
+   Three distinct shapes, matching the portal: green circle = Open,
+   blue square = Closed, amber triangle = Wait List. */
+.dot { display: inline-block; width: 11px; height: 11px; margin-right: 7px; vertical-align: middle; }
+.dot.open { border-radius: 50%; background: #2f9e41; }
+.dot.closed { background: #a9c9e8; border: 1px solid #5f8fbf; }
+.dot.wait {
+  width: 0; height: 0; background: none;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 11px solid #edb31f;
+}
 
 /* ---- step wizard ---- */
 .steps { display: flex; align-items: center; margin: 18px 0 22px; }
