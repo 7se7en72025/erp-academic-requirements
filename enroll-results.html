@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>View Results</title>
+<link rel="stylesheet" href="chrome.css">
+</head>
+<body>
+<div id="chrome-root"></div>
+<script src="data.js"></script>
+<script src="chrome.js"></script>
+<script>
+renderChrome({ active: 'shopping-cart', pageName: 'Plan' });
+
+var cart = getCart();
+var enrolled = getEnrolled();
+cart.forEach(function (entry) {
+  if (!enrolled.some(function (e) { return e.courseId === entry.courseId; })) {
+    enrolled.push(entry);
+  }
+});
+saveEnrolled(enrolled);
+saveCart([]);
+
+var rows = cart.map(function (entry) {
+  var course = COURSES[entry.courseId];
+  return '<tr><td>' + course.code + '</td>' +
+    '<td>Success: This class has been added to your schedule.</td>' +
+    '<td><span style="color:var(--green);">&#10004;</span></td></tr>';
+}).join('') || '<tr><td colspan="3" style="text-align:center;color:#666;">No classes were in the cart.</td></tr>';
+
+document.getElementById('main-content').innerHTML =
+  '<ul class="tabs"><li><a href="#">Search</a></li><li class="active"><a href="#">Plan</a></li>' +
+  '<li><a href="#">Enroll</a></li><li><a href="#">My Academics</a></li></ul>' +
+  '<div class="steps">' +
+    '<div class="step done"><span class="circle">1</span> Select classes</div><div class="connector"></div>' +
+    '<div class="step done"><span class="circle">2</span> Confirm classes</div><div class="connector"></div>' +
+    '<div class="step active"><span class="circle">3</span> View results</div>' +
+  '</div>' +
+  '<h1 class="page-title">3. View Results</h1>' +
+  '<p class="breadcrumb">View the following status report for enrollment confirmations and errors.</p>' +
+  '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +
+  '<div class="legend">' +
+    '<span><span style="color:var(--green);">&#10004;</span> Success: enrolled</span>' +
+    '<span><span style="color:#c0392b;">&#10008;</span> Error: unable to add class</span>' +
+  '</div>' +
+  '<div class="grid-scroll"><table class="data">' +
+    '<thead><tr><th>Class</th><th>Message</th><th>Status</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody>' +
+  '</table></div>' +
+  '<p style="margin-top:16px;"><a href="weekly-schedule.html">My Class Schedule</a> &nbsp;|&nbsp; ' +
+  '<a href="academic-requirements.html">Add Another Class</a></p>';
+</script>
+</body>
+</html>

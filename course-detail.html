@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Course Detail</title>
+<link rel="stylesheet" href="chrome.css">
+</head>
+<body>
+<div id="chrome-root"></div>
+<script src="data.js"></script>
+<script src="chrome.js"></script>
+<script>
+renderChrome({ active: 'academic-requirements', pageName: 'My Academics' });
+
+var params = new URLSearchParams(location.search);
+var courseId = params.get('course') || COURSE_ORDER[0];
+var course = COURSES[courseId];
+
+// step state (in-memory, resets per page load)
+var chosen = {}; // type -> section object
+
+var COMP_NAME = { L: 'Lecture', T: 'Tutorial', P: 'Laboratory' };
+
+function statusDot(status) {
+  var cls = status === 'open' ? 'open' : status === 'wait' ? 'wait' : 'closed';
+  var label = status === 'open' ? 'Open' : status === 'wait' ? 'Wait List' : 'Closed';
+  return '<span class="dot ' + cls + '"></span>' + label;
+}
+
+function sectionTable(type) {
+  var secs = course.sections[type] || [];
+  var rows = secs.map(function (s) {
+    var disabled = s.status === 'closed' ? 'disabled' : '';
+    return '<tr>' +
+      '<td>' + s.id + ' (' + COMP_NAME[type] + ')</td>' +
+      '<td>' + s.days + '</td><td>' + s.time + '</td><td>' + s.room + '</td>' +
+      '<td>' + s.instructor + '</td><td>' + statusDot(s.status) + '</td>' +
+      '<td><button class="ps-btn" ' + disabled + ' onclick="selectSection(\'' + type + '\',\'' + s.id + '\')">Select</button></td>' +
+      '</tr>';
+  }).join('');
+  return '<div class="panel">' +
+    '<div class="panel-title">Select ' + COMP_NAME[type] + ' Section' + (course.components.find(function(c){return c.type===type;}).required ? ' (Required)' : '') + '</div>' +
+    '<div class="grid-scroll"><table class="data">' +
+      '<thead><tr><th>Section</th><th>Days</th><th>Time</th><th>Room</th><th>Instructor</th><th>Status</th><th></th></tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+    '</table></div></div>';
+}
+
+function chosenSummary() {
+  var keys = Object.keys(chosen);
+  if (!keys.length) return '';
+  var rows = keys.map(function (t) {
+    var s = chosen[t];
+    return '<tr><td>' + course.code + '-' + s.id + '</td><td>' + COMP_NAME[t] + '</td>' +
+      '<td>' + s.days + ' ' + s.time + '</td><td>' + s.room + '</td><td>' + s.instructor + '</td></tr>';
+  }).join('');
+  return '<div class="panel"><div class="panel-title">Class Preferences</div><div class="panel-body">' +
+    '<div class="grid-scroll"><table class="data"><thead><tr><th>Section</th><th>Component</th><th>Days &amp; Times</th><th>Room</th><th>Instructor</th></tr></thead>' +
+    '<tbody>' + rows + '</tbody></table></div>' +
+    '<div style="margin-top:12px;">' +
+      (keys.length < course.components.length
+        ? '<span style="color:#666;">Select the remaining required section above, then continue.</span>'
+        : '<button class="ps-btn primary" onclick="confirmAdd()">Next</button>') +
+    '</div>' +
+  '</div></div>';
+}
+
+function render() {
+  var needed = course.components.map(function (c) { return c.type; });
+  var pending = needed.filter(function (t) { return !chosen[t]; });
+
+  var html =
+    '<div class="subnav"><a href="academic-requirements.html">My Academic Requirements</a>' +
+    '<span class="sep">|</span><span class="current">Course Detail</span></div>' +
+    '<h1 class="page-title">' + course.code + ' - ' + course.name + '</h1>' +
+    '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +
+    '<div class="panel"><div class="panel-title">Course Detail</div><div class="panel-body">' +
+      '<p><strong>Career:</strong> First Degree &nbsp; <strong>Units:</strong> ' + course.units.toFixed(2) +
+      ' &nbsp; <strong>Grading Basis:</strong> Course Grading</p>' +
+      '<p><strong>Course Components:</strong> ' + course.components.map(function(c){return COMP_NAME[c.type] + (c.required ? ' (Required)' : '');}).join(', ') + '</p>' +
+      '<p><strong>Campus:</strong> Hyderabad On Campus &nbsp; <strong>Academic Organization:</strong> ' + course.dept + '</p>' +
+      '<button class="ps-btn" id="showSectionsBtn">Show Sections</button>' +
+    '</div></div>' +
+    '<div id="sectionsArea"></div>' +
+    '<div id="prefsArea">' + chosenSummary() + '</div>' +
+    '<div id="confirmArea"></div>' +
+    '<p><a href="academic-requirements.html">&laquo; Return to My Academic Requirements</a></p>';
+
+  document.getElementById('main-content').innerHTML = html;
+  document.getElementById('showSectionsBtn').onclick = function () {
+    document.getElementById('sectionsArea').innerHTML = needed.map(sectionTable).join('');
+  };
+}
+
+function selectSection(type, secId) {
+  chosen[type] = course.sections[type].find(function (s) { return s.id === secId; });
+  render();
+  document.getElementById('sectionsArea').innerHTML = course.components
+    .map(function (c) { return c.type; })
+    .map(sectionTable)
+    .join('');
+}
+
+function confirmAdd() {
+  addToCart({ courseId: courseId, sections: chosen });
+  document.getElementById('confirmArea').innerHTML =
+    '<div class="modal-overlay" id="modalOverlay"><div class="modal-box">' +
+      '<p><strong>' + course.code + '</strong> has been added to your Shopping Cart. To register in this course you need to go to Registration Shopping Cart and click the Validate button.</p>' +
+      '<div class="modal-actions"><button class="ps-btn primary" onclick="closeModal()">OK</button></div>' +
+    '</div></div>' +
+    '<p style="color:var(--green);">&#10004; ' + course.code + ' has been added to your Shopping Cart. <a href="shopping-cart.html">Go to Shopping Cart</a></p>';
+}
+function closeModal() {
+  var m = document.getElementById('modalOverlay');
+  if (m) m.classList.add('hidden');
+}
+
+render();
+</script>
+</body>
+</html>

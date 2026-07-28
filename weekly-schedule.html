@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Weekly Schedule</title>
+<link rel="stylesheet" href="chrome.css">
+</head>
+<body>
+<div id="chrome-root"></div>
+<script src="data.js"></script>
+<script src="chrome.js"></script>
+<script>
+renderChrome({ active: 'view-my-classes', pageName: 'My Weekly Schedule' });
+
+var COMP_NAME = { L: 'Lecture', T: 'Tutorial', P: 'Lab' };
+var DAY_CODES = { Mo: 'Monday', Tu: 'Tuesday', We: 'Wednesday', Th: 'Thursday', Fr: 'Friday', Sa: 'Saturday', Su: 'Sunday' };
+var DAY_ORDER = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+var HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+
+function parseDays(str) {
+  var out = [];
+  for (var i = 0; i < str.length; i += 2) out.push(str.substr(i, 2));
+  return out;
+}
+function parseStartHour(timeStr) {
+  var m = timeStr.match(/^(\d+):(\d+)(AM|PM)/);
+  if (!m) return null;
+  var h = parseInt(m[1], 10);
+  if (m[3] === 'PM' && h !== 12) h += 12;
+  if (m[3] === 'AM' && h === 12) h = 0;
+  return h;
+}
+
+var enrolled = getEnrolled();
+var cells = {}; // "day-hour" -> array of labels
+
+enrolled.forEach(function (entry) {
+  var course = COURSES[entry.courseId];
+  Object.keys(entry.sections).forEach(function (type) {
+    var s = entry.sections[type];
+    var startHour = parseStartHour(s.time.split('-')[0].trim());
+    parseDays(s.days).forEach(function (d) {
+      var key = d + '-' + startHour;
+      cells[key] = cells[key] || [];
+      cells[key].push(course.code + ' - ' + s.id + ' ' + COMP_NAME[type] + '<br>' + s.time + '<br>Room: ' + s.room);
+    });
+  });
+});
+
+var head = '<tr><th>Time</th>' + DAY_ORDER.map(function (d) { return '<th>' + DAY_CODES[d] + '</th>'; }).join('') + '</tr>';
+var body = HOURS.map(function (h) {
+  var label = (h % 12 === 0 ? 12 : h % 12) + ':00' + (h < 12 ? 'AM' : 'PM');
+  var row = '<tr><td>' + label + '</td>';
+  DAY_ORDER.forEach(function (d) {
+    var key = d + '-' + h;
+    if (cells[key]) {
+      row += '<td class="busy">' + cells[key].join('<hr>') + '</td>';
+    } else {
+      row += '<td class="slot"></td>';
+    }
+  });
+  row += '</tr>';
+  return row;
+}).join('');
+
+document.getElementById('main-content').innerHTML =
+  '<h1 class="page-title">My Weekly Schedule</h1>' +
+  '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +
+  (enrolled.length === 0
+    ? '<p style="color:#666;">You are not registered for classes in this term. <a href="academic-requirements.html">Go register</a>.</p>'
+    : '<div class="panel"><div class="panel-title">Schedule</div><div class="grid-scroll">' +
+      '<table class="data weekly-grid"><thead>' + head + '</thead><tbody>' + body + '</tbody></table>' +
+      '</div></div>');
+</script>
+</body>
+</html>

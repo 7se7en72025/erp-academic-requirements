@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Homepage</title>
+<link rel="stylesheet" href="chrome.css">
+<style>
+  .tiles { display: flex; flex-wrap: wrap; gap: 20px; padding: 10px 4px; }
+  .tile {
+    width: 170px; height: 130px;
+    border: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; text-decoration: none; color: #222; font-size: 13px; text-align: center;
+    background: #fafafa;
+  }
+  .tile:hover { border-color: var(--blue); background: #f0f6fb; }
+  .tile .glyph { font-size: 30px; color: var(--blue); }
+  .intro { color: #444; margin: 10px 0 20px; }
+</style>
+</head>
+<body>
+<div id="chrome-root"></div>
+<script src="chrome.js"></script>
+<script>
+  renderChrome({ active: '', pageName: 'Student Homepage' });
+  document.getElementById('main-content').innerHTML =
+    '<p class="intro">Welcome back. Select a tile below to continue.</p>' +
+    '<div class="tiles">' +
+      '<a class="tile" href="academic-requirements.html"><span class="glyph">&#128220;</span>Registration</a>' +
+      '<a class="tile" href="shopping-cart.html"><span class="glyph">&#128722;</span>Shopping Cart</a>' +
+      '<a class="tile" href="weekly-schedule.html"><span class="glyph">&#128197;</span>My Class Schedule</a>' +
+      '<a class="tile" href="#"><span class="glyph">&#128176;</span>Fee Payment</a>' +
+      '<a class="tile" href="#"><span class="glyph">&#127891;</span>Grades</a>' +
+    '</div>';
+</script>
+</body>
+</html>

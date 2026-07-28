@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Academic Requirements</title>
+<link rel="stylesheet" href="chrome.css">
+</head>
+<body>
+<div id="chrome-root"></div>
+<script src="data.js"></script>
+<script src="chrome.js"></script>
+<script>
+renderChrome({ active: 'academic-requirements', pageName: 'My Academics' });
+
+function statusIcon(courseId) {
+  var enrolled = getEnrolled().some(function (e) { return e.courseId === courseId; });
+  var inCart = getCart().some(function (c) { return c.courseId === courseId; });
+  if (enrolled) return '<span class="ic taken" title="Taken">&#10004;</span>';
+  if (inCart) return '<span class="ic prog" title="In Progress">&#9670;</span>';
+  return '';
+}
+
+var rows = COURSE_ORDER.map(function (id) {
+  var c = COURSES[id];
+  return '<tr><td>' + statusIcon(id) + '<a href="course-detail.html?course=' + id + '">' + c.code + '</a></td>' +
+    '<td>' + c.name + '</td><td class="num">' + c.units.toFixed(2) + '</td>' +
+    '<td>' + TERM + '</td><td></td><td></td></tr>';
+}).join('');
+
+var takenCount = getEnrolled().length;
+
+document.getElementById('main-content').innerHTML =
+  '<ul class="tabs">' +
+    '<li><a href="#">Search</a></li>' +
+    '<li><a href="#">Plan</a></li>' +
+    '<li><a href="#">Enroll</a></li>' +
+    '<li class="active"><a href="#">My Academics</a></li>' +
+  '</ul>' +
+  '<h1 class="page-title">My Academic Requirements</h1>' +
+  '<p class="breadcrumb">' + STUDENT.campus + '</p>' +
+  '<p><strong>This report last generated on</strong> ' + new Date().toLocaleString() + '</p>' +
+  '<div style="display:flex;gap:10px;margin:0 0 14px;">' +
+    '<button class="ps-btn" id="collapseAll">Collapse All</button>' +
+    '<button class="ps-btn" id="expandAll">Expand All</button>' +
+    '<a class="ps-btn" href="shopping-cart.html">View Shopping Cart</a>' +
+  '</div>' +
+  '<div class="legend">' +
+    '<span><i class="ic taken">&#10004;</i> Taken</span>' +
+    '<span><i class="ic prog">&#9670;</i> In Progress</span>' +
+    '<span><i class="ic plan">&#9733;</i> Planned</span>' +
+  '</div>' +
+  '<div class="panel" id="grp-cs">' +
+    '<div class="panel-title" data-toggle>&#9660; Computer Science</div>' +
+    '<div class="panel-body">' +
+      '<p><strong>Not Satisfied:</strong> Computer Science</p>' +
+      '<div class="panel" style="margin-left:16px;">' +
+        '<div class="panel-title">Computer Sc. FS PS HYDON</div>' +
+        '<div class="panel-body">' +
+          '<p><strong>Not Satisfied:</strong> Computer Sc. FS PS HYDON</p>' +
+          '<ul>' +
+            '<li>Units: 144.00 required, ' + (takenCount * 2.14).toFixed(2) + ' taken, 144.00 needed</li>' +
+            '<li>Courses: 42 required, ' + takenCount + ' taken, ' + (42 - takenCount) + ' needed</li>' +
+            '<li>GPA: 4.500 required, 0.000 actual</li>' +
+          '</ul>' +
+          '<div class="panel">' +
+            '<div class="panel-title">&#9660; Year 1 Sem 1</div>' +
+            '<div class="panel-body">' +
+              '<p><strong>Not Satisfied:</strong> All courses are compulsory.</p>' +
+              '<ul><li>Courses: 7 required, ' + takenCount + ' taken, ' + (7 - takenCount) + ' needed</li></ul>' +
+              '<div class="panel">' +
+                '<div class="panel-title">The following courses may be used to satisfy this requirement:</div>' +
+                '<div class="grid-scroll"><table class="data">' +
+                  '<thead><tr><th>Course</th><th>Description</th><th class="num">Units</th><th>When</th><th>Grade</th><th>Status</th></tr></thead>' +
+                  '<tbody>' + rows + '</tbody>' +
+                '</table></div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>' +
+  '<p class="go-top"><a href="#top">&#9650; Go to top</a></p>';
+
+document.getElementById('collapseAll').onclick = function () {
+  document.querySelectorAll('.main .panel-body').forEach(function (b) { b.style.display = 'none'; });
+};
+document.getElementById('expandAll').onclick = function () {
+  document.querySelectorAll('.main .panel-body').forEach(function (b) { b.style.display = ''; });
+};
+</script>
+</body>
+</html>

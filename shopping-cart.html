@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enrollment Shopping Cart</title>
+<link rel="stylesheet" href="chrome.css">
+</head>
+<body>
+<div id="chrome-root"></div>
+<script src="data.js"></script>
+<script src="chrome.js"></script>
+<script>
+renderChrome({ active: 'shopping-cart', pageName: 'My Academics' });
+
+var COMP_NAME = { L: 'Lecture', T: 'Tutorial', P: 'Laboratory' };
+
+function render() {
+  var cart = getCart();
+  var rowsHtml = '';
+  if (!cart.length) {
+    rowsHtml = '<tr><td colspan="7" style="text-align:center;color:#666;padding:16px;">Your shopping cart is empty.</td></tr>';
+  } else {
+    cart.forEach(function (entry) {
+      var course = COURSES[entry.courseId];
+      Object.keys(entry.sections).forEach(function (type) {
+        var s = entry.sections[type];
+        rowsHtml += '<tr>' +
+          '<td><input type="checkbox" checked data-course="' + entry.courseId + '"></td>' +
+          '<td>' + course.code + '-' + s.id + ' ' + COMP_NAME[type] + '</td>' +
+          '<td>' + s.days + ' ' + s.time + '</td><td>' + s.room + '</td>' +
+          '<td>' + s.instructor + '</td><td class="num">' + course.units.toFixed(2) + '</td>' +
+          '<td><span class="dot open"></span>Open</td>' +
+          '</tr>';
+      });
+    });
+  }
+
+  document.getElementById('main-content').innerHTML =
+    '<div class="subnav"><span class="current">Enrollment Shopping Cart</span></div>' +
+    '<h1 class="page-title">Enrollment Shopping Cart</h1>' +
+    '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +
+    '<div class="legend">' +
+      '<span><span class="dot open"></span>Open</span>' +
+      '<span><span class="dot closed"></span>Closed</span>' +
+      '<span><span class="dot wait"></span>Wait List</span>' +
+    '</div>' +
+    '<div class="panel"><div class="panel-title">' + TERM + ' Shopping Cart</div>' +
+      '<div class="grid-scroll"><table class="data">' +
+        '<thead><tr><th></th><th>Class</th><th>Days/Times</th><th>Room</th><th>Instructor</th><th class="num">Units</th><th>Status</th></tr></thead>' +
+        '<tbody>' + rowsHtml + '</tbody>' +
+      '</table></div>' +
+      '<div class="panel-body">' +
+        '<button class="ps-btn" id="deleteBtn" ' + (cart.length ? '' : 'disabled') + '>Delete Selected</button> ' +
+        '<button class="ps-btn primary" id="validateBtn" ' + (cart.length ? '' : 'disabled') + '>Validate</button>' +
+      '</div>' +
+    '</div>' +
+    '<p><a href="academic-requirements.html">&laquo; Add another class</a></p>';
+
+  document.getElementById('validateBtn').onclick = function () {
+    location.href = 'enroll-results.html';
+  };
+  document.getElementById('deleteBtn').onclick = function () {
+    document.querySelectorAll('#main-content input[type=checkbox]:checked').forEach(function (cb) {
+      removeFromCart(cb.dataset.course);
+    });
+    render();
+  };
+}
+
+render();
+</script>
+</body>
+</html>
