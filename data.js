@@ -108,7 +108,7 @@ var COURSE_ORDER = ['CHEMF110', 'CHEMF111', 'EEEF111', 'MATHF111', 'MEF112', 'PH
 // semesters are listed for context only (registration is Sem-1 focused).
 var PROGRAM = {
   plan: 'Computer Science',
-  subplan: 'Computer Sc. FS PS HYDON',
+  subplan: 'Computer Sc. FS PS PILON',
   unitsRequired: 144,
   coursesRequired: 42,
   gpaRequired: '4.500',
