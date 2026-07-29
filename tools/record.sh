@@ -22,7 +22,7 @@ RAW="$(mktemp -u /tmp/erp-raw-XXXXXX.mp4)"
 
 if ! (cd "$HERE" && node -e "require.resolve('playwright')") 2>/dev/null; then
   echo "playwright is not installed. From $HERE run:" >&2
-  echo "    npm install playwright && npx playwright install chromium" >&2
+  echo "    npm install" >&2
   exit 1
 fi
 

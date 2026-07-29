@@ -1,0 +1,12 @@
+{
+  "name": "erp-walkthrough-recorder",
+  "private": true,
+  "type": "module",
+  "description": "Headless-Chromium recorder for the autoplay walkthrough (see record.sh).",
+  "scripts": {
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.62.0"
+  }
+}

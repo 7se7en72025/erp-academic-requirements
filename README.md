@@ -53,6 +53,18 @@ official timetable PDF for actual sections.
 Refreshing any page clears the cart and enrolled classes, so the flow can be demoed
 again from the start; Ctrl+X does the same on purpose.
 
+## Safety
+
+There is no form, password field, or network call anywhere in the app — state
+lives in `localStorage` and never leaves the browser. Every page ships a
+`Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self';
+img-src 'self' data:; base-uri 'none'; form-action 'none'` and `robots: noindex,
+nofollow`, so nothing loads outside this repo and the pages can't turn up in
+search next to the real portal. `index.html` carries the full disclaimer banner
+because it's the page a stranger is most likely to land on cold; every other page
+identifies itself as `777  -  SISDEMO` in the instance strip, the same way the
+real portal's own chrome names a non-production environment.
+
 ## Flow
 
 Student Homepage → Registration tile → My Academic Requirements → click a course →
