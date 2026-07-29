@@ -46,8 +46,22 @@
     scroll: 650    // wait for smooth scrolling to finish
   };
 
-  function ms(value) { return value / speed; }
+  // Per-step pacing, on top of the global speed. The bulk of the run is the
+  // same seven-course add repeated over and over, which buries the payoff at
+  // the end -- so the repetitive stretches run at RATE.brisk and the screens
+  // worth actually reading get a `hold` (see the step list).
+  var RATE = { brisk: 1.7 };
+  var stepRate = 1;
+
+  function ms(value) { return value / (speed * stepRate); }
   function sleep(value) { return new Promise(function (resolve) { setTimeout(resolve, ms(value)); }); }
+
+  // A hold is a fixed dwell, deliberately NOT divided by stepRate -- the whole
+  // point is that it stays long while the surrounding steps are quick. It is
+  // still scaled by the global speed so ?speed keeps working end to end.
+  function hold(value) {
+    return new Promise(function (resolve) { setTimeout(resolve, value / speed); });
+  }
 
   // Which courses to register and which sections to pick. All open sections,
   // and no meeting-time clashes between them, so Validate reports every row as
@@ -80,7 +94,15 @@
   // ---- the step list ------------------------------------------------------
 
   var steps = [];
-  function step(page, caption, find) { steps.push({ page: page, caption: caption, find: find }); }
+
+  /** `options` may carry { rate, hold } -- see RATE and hold() above. */
+  function step(page, caption, find, options) {
+    options = options || {};
+    steps.push({
+      page: page, caption: caption, find: find,
+      rate: options.rate || 1, hold: options.hold || 0
+    });
+  }
 
   step('student-homepage', 'Open Registration from the Student Homepage', function () {
     // Scoped to the tile: the sidebar links to the same page and comes first
@@ -88,37 +110,42 @@
     return document.querySelector('a.tile[href*="academic-requirements"]');
   });
 
-  PLAN.forEach(function (course) {
+  // The same add-to-cart cycle seven times over. The first course plays at
+  // full speed so the pattern is legible; the rest are brisk, since by then
+  // the viewer knows what is coming and the interesting part is the end.
+  PLAN.forEach(function (course, index) {
+    var pace = { rate: index === 0 ? 1 : RATE.brisk };
+
     step('academic-requirements', 'Open ' + course.name, function () {
       return document.querySelector('a[href*="course=' + course.id + '"]');
-    });
+    }, pace);
     step('course-detail', 'Show the sections offered for ' + course.name, function () {
       // Two buttons reveal the sections; the demo uses the lower one so the
       // cursor travels past the course facts on its way there.
       return byText('button.ps-btn', 'Show Sections');
-    });
+    }, pace);
     step('course-detail', 'Select section ' + course.picks[0], function () {
       return byAction('select-section', '[data-section="' + course.picks[0] + '"]');
-    });
+    }, pace);
 
     if (course.picks.length > 1) {
       step('related-sections', 'Pick the required ' + course.picks[1] + ' section', function () {
         return document.querySelector('input[name="rel"][value="' + course.picks[1] + '"]');
-      });
+      }, pace);
       step('related-sections', 'Confirm the section pair', function () {
         return byAction('next');
-      });
+      }, pace);
     }
 
     step('enrollment-preferences', 'Add ' + course.name + ' to the cart', function () {
       return byAction('add-to-cart');
-    });
+    }, pace);
     step('course-detail', 'Acknowledge the confirmation', function () {
       return byAction('close-modal');
-    });
+    }, pace);
     step('course-detail', 'Back to My Academic Requirements', function () {
       return byText('a', 'Return to My Academic Requirements');
-    });
+    }, pace);
   });
 
   step('academic-requirements', 'All seven courses are in the cart — open it', function () {
@@ -130,23 +157,30 @@
   step('shopping-cart', 'Validate the cart for clashes', function () {
     return byAction('validate');
   });
-  step('validate-results', 'No conflicts — proceed to enroll', function () {
-    return byAction('proceed');
-  });
+
+  // The status report is the point of validating, so sit on it long enough to
+  // actually read the seven "OK to Add" rows, then go back to the cart and use
+  // its own Enroll button -- "Proceed to Enroll" would skip straight past it.
+  step('validate-results', 'Every class reports OK to Add — back to the cart', function () {
+    return byAction('back-to-cart');
+  }, { hold: 4500 });
+  step('shopping-cart', 'Now Enroll to register the cart', function () {
+    return byAction('enroll');
+  }, { hold: 1200 });
 
   // Step 1 of the wizard walks the cart one course at a time; the last Next
   // moves the wizard on to Confirm classes.
   PLAN.forEach(function (course, i) {
     step('enroll-results', 'Review ' + course.name + ' (' + (i + 1) + ' of ' + PLAN.length + ')', function () {
       return byAction('next-course');
-    });
+    }, { rate: i === 0 ? 1 : RATE.brisk });
   });
   step('enroll-results', 'Finish registration', function () {
     return byAction('finish');
-  });
+  }, { hold: 3000 });
   step('enroll-results', 'All classes added — open the timetable', function () {
     return byAction('view-schedule');
-  });
+  }, { hold: 3500 });
   step('weekly-schedule', null, null);   // terminal: nothing left to click
 
   // ---- cursor and caption chrome -----------------------------------------
@@ -297,6 +331,8 @@
         return finish('Walkthrough paused (unexpected page: ' + currentPage() + ').');
       }
 
+      stepRate = current.rate;
+
       if (!current.find) {   // terminal step
         window.scrollTo({ top: document.body.scrollHeight * 0.35, behavior: 'smooth' });
         return finish('Registration complete — this is the weekly timetable.');
@@ -308,6 +344,11 @@
       if (!target) return finish('Walkthrough stopped: could not find "' + current.caption + '".');
 
       await reveal(target);
+
+      // Dwell before the click, not after: the click navigates away, so a
+      // pause afterwards would be cut short by the page unloading.
+      if (current.hold) await hold(current.hold);
+
       var box = target.getBoundingClientRect();
       await moveTo(box.left + box.width / 2, box.top + box.height / 2);
       await sleep(TIMING.aim);

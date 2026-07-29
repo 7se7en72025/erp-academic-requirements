@@ -86,3 +86,19 @@ narration afterwards.
 The run always resets state first, so it starts from empty every time. It
 picks only open sections, and the combination has no meeting-time clashes,
 so Validate reports every course as OK to Add.
+
+## Recording it
+
+```
+tools/record.sh "../ERP Registration Walkthrough - Demo.mp4"
+```
+
+Serves the site, plays the walkthrough in a headless Chromium and captures it
+to a 2560x1440 mp4. Takes about as long as the walkthrough itself (~3 min).
+
+Record at **1280x720 CSS** — the default, and worth not changing. The layout is
+a 288px sidebar plus a main column capped at `max-width: 1080px`, so the portal
+is never wider than ~1270px. In a 1920-wide viewport almost a third of the
+frame is blank margin and everything on screen is correspondingly smaller; at
+1280 the content fills the frame edge to edge. Resolution comes from `--dsf 2`
+rendering that layout at 2x, not from a bigger viewport.

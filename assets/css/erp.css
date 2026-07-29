@@ -424,8 +424,14 @@ table.data tbody tr:hover td { background: #fdf6d2; }
 .mini-row { display: flex; gap: 18px; padding: 3px 0; font-size: 12.5px; }
 .mini-row .mini-code { flex: 0 0 96px; }
 
-/* ---- weekly meeting-days grid ---- */
-.weekly-grid th { font-size: 11px; white-space: nowrap; padding: 5px 7px; }
+/* ---- weekly meeting-days grid ----
+   Ten hour columns plus the day column. Held on one line each, the header
+   wants ~1300px, which is wider than the main column ever gets -- so the
+   grid-scroll silently clipped the last three hours off the right, with no
+   scrollbar to say so. Letting the hour labels break in two keeps every
+   column on screen at any viewport the walkthrough is recorded at. The day
+   names keep their nowrap -- see the .daycell rules below. */
+.weekly-grid th { font-size: 11px; padding: 5px 7px; }
 .weekly-grid td { font-size: 11px; padding: 5px 7px; }
 .weekly-grid td.daycell { white-space: nowrap; font-size: 12px; }
 .weekly-grid td.slot { height: 30px; min-width: 78px; }
