@@ -13,9 +13,27 @@
 
   var RUNNING_KEY = 'erp_demo_on';
   var STEP_KEY = 'erp_demo_idx';
+  var OPTS_KEY = 'erp_demo_opts';
+  var POS_KEY = 'erp_demo_pos';
 
+  // The run moves between pages by clicking the real links, which carry no
+  // query string of their own -- so ?speed and ?caption only ever reach the
+  // first page. Park them alongside the progress index the first time they
+  // are seen, and read them back on every later page.
   var query = new URLSearchParams(location.search);
-  var speed = parseFloat(query.get('speed')) || 1;
+  var opts = {};
+  // ?demo=1 always begins a fresh run, so it takes only its own options --
+  // otherwise a plain ?demo=1 would inherit the speed of an earlier run in
+  // the same tab. Later pages of a run have no query string and read back
+  // what was parked here.
+  if (query.get('demo') !== '1') {
+    try { opts = JSON.parse(sessionStorage.getItem(OPTS_KEY) || '{}'); } catch (e) { opts = {}; }
+  }
+  if (query.has('speed')) opts.speed = query.get('speed');
+  if (query.has('caption')) opts.caption = query.get('caption');
+  try { sessionStorage.setItem(OPTS_KEY, JSON.stringify(opts)); } catch (e) { /* private mode */ }
+
+  var speed = parseFloat(opts.speed) || 1;
 
   // Pacing in milliseconds, before the speed multiplier. Tuned to read as
   // deliberate rather than snappy -- this is meant to be watched, not used.
@@ -134,7 +152,23 @@
   // ---- cursor and caption chrome -----------------------------------------
 
   var cursor, ripple, caption;
-  var position = { x: 90, y: 90 };
+
+  // A click usually navigates, and the next page re-runs this file from the
+  // top -- so an in-memory position would snap the cursor back to the corner
+  // on every hop. Park it where the click left it and resume from there.
+  var HOME = { x: 90, y: 90 };
+  var position = HOME;
+  if (query.get('demo') !== '1') {   // a fresh run always starts from HOME
+    try {
+      var parked = JSON.parse(sessionStorage.getItem(POS_KEY) || 'null');
+      if (parked && isFinite(parked.x) && isFinite(parked.y)) position = parked;
+    } catch (e) { /* keep HOME */ }
+  }
+
+  function parkPosition() {
+    try { sessionStorage.setItem(POS_KEY, JSON.stringify(position)); } catch (e) { /* private mode */ }
+  }
+
   var stopped = false;
 
   function buildOverlay() {
@@ -155,7 +189,7 @@
     caption = document.createElement('div');
     caption.className = 'demo-caption';
     caption.setAttribute('role', 'status');
-    if (query.get('caption') === '0') caption.hidden = true;
+    if (opts.caption === '0') caption.hidden = true;
 
     document.body.appendChild(ripple);
     document.body.appendChild(cursor);
@@ -282,6 +316,7 @@
       // Advance before clicking: the click usually navigates, and the next page
       // load has to pick up at the following step.
       setStepIndex(index + 1);
+      parkPosition();
       target.click();
 
       await sleep(TIMING.after);

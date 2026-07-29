@@ -646,6 +646,9 @@ table.data td.empty-row { padding: 16px; }
   opacity: 0; transition: opacity .3s ease;
 }
 .demo-caption.visible { opacity: 1; }
+/* ?caption=0 sets the hidden attribute, but the class rule above out-specifies
+   the UA [hidden] rule, so say() would fade it back in. Keep it hidden. */
+.demo-caption[hidden] { display: none !important; }
 
 /* ---- print ("View Report as PDF") ----
    The disclaimer prints too. A printout of this that looks like an official
