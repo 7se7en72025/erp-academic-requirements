@@ -6,124 +6,21 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Weekly Schedule</title>
-<link rel="stylesheet" href="chrome.css?v=6">
+<title>ERP Demo</title>
+<link rel="stylesheet" href="assets/css/erp.css?v=15">
 </head>
 <body>
 <div id="chrome-root"></div>
-<script src="data.js?v=6"></script>
-<script src="chrome.js?v=6"></script>
-<script>
-renderChrome({ active: 'view-my-classes', pageName: 'Registration' });
 
-var DAY_NAMES = { Mo: 'Monday', Tu: 'Tuesday', We: 'Wednesday', Th: 'Thursday',
-                  Fr: 'Friday', Sa: 'Saturday', Su: 'Sunday' };
-var DAY_ORDER = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-var HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
-var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-var weekOffset = 0;           // 0 = the first teaching week of the term
-var view = 'week';            // 'week' | 'list'
-var enrolled = getEnrolled();
-var blocks = scheduleBlocks(enrolled);
-
-function fmt(d) { return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
-
-function weekStart() {
-  var d = new Date(2026, 7, 3);            // Mon 03/08/2026, first teaching Monday
-  d.setDate(d.getDate() + weekOffset * 7);
-  return d;
-}
-
-function calendar() {
-  var start = weekStart();
-  var head = '<tr><th>Time</th>' + DAY_ORDER.map(function (code, i) {
-    var d = new Date(start); d.setDate(d.getDate() + i);
-    return '<th>' + DAY_NAMES[code] + '<br>' + d.getDate() + ' ' + MONTHS[d.getMonth()] + '</th>';
-  }).join('') + '</tr>';
-
-  var body = HOURS.map(function (h) {
-    var label = (h % 12 === 0 ? 12 : h % 12) + ':00' + (h < 12 ? 'AM' : 'PM');
-    return '<tr><td class="timecell">' + label + '</td>' + DAY_ORDER.map(function (code) {
-      var hit = blocks.filter(function (b) { return b.day === code && h >= b.start && h < b.end; });
-      if (!hit.length) return '<td class="empty"></td>';
-      return '<td class="ev">' + hit.map(function (b) {
-        return b.code + ' - ' + b.sec.id + '<br>' + COMP_NAME[b.comp] + '<br>' +
-          b.sec.time + '<br>Location: ' + b.sec.room;
-      }).join('<hr>') + '</td>';
-    }).join('') + '</tr>';
-  }).join('');
-
-  return '<div class="grid-scroll"><table class="cal"><thead>' + head +
-    '</thead><tbody>' + body + '</tbody></table></div>';
-}
-
-function listView() {
-  var rows = '';
-  enrolled.forEach(function (e) {
-    var c = COURSES[e.courseId];
-    c.components.forEach(function (comp) {
-      var s = e.sections[comp.type];
-      if (typeof s === 'string') s = c.sections[comp.type].find(function (x) { return x.id === s; });
-      if (!s) return;
-      rows += '<tr><td>' + c.code + '-' + s.id + '<br>(' + s.nbr + ')</td>' +
-        '<td>' + c.name + '</td><td>' + COMP_NAME[comp.type] + '</td>' +
-        '<td>' + s.days + ' ' + s.time + '</td><td>' + s.room + '</td>' +
-        '<td>' + s.instructor + '</td></tr>';
-    });
-  });
-  return '<div class="grid-scroll"><table class="data"><thead><tr><th>Class</th>' +
-    '<th>Description</th><th>Component</th><th>Days/Times</th><th>Room</th>' +
-    '<th>Instructor</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
-}
-
-function render() {
-  var start = weekStart();
-  var end = new Date(start); end.setDate(end.getDate() + 6);
-
-  var body;
-  if (!enrolled.length) {
-    body = '<p style="margin-left:8px;">You are not registered for classes in this term. ' +
-      '<a href="academic-requirements.html?_c=6">Go register</a>.</p>';
-  } else if (view === 'list') {
-    body = '<div class="req-sub">Schedule</div>' + listView();
-  } else {
-    body =
-      '<div class="weeknav">' +
-        '<button class="ps-btn" onclick="shiftWeek(-1)">&lt;&lt; Previous Week</button>' +
-        '<span class="weeklabel">Week of ' + fmt(start) + ' - ' + fmt(end) + '</span>' +
-        '<button class="ps-btn" onclick="shiftWeek(1)">Next Week &gt;&gt;</button>' +
-      '</div>' +
-      '<div class="panel"><div class="panel-body">' +
-        '<strong>Show Week of</strong> <input type="text" size="10" value="' + fmt(start) + '" readonly> ' +
-        '&nbsp;<strong>Start Time</strong> <input type="text" size="7" value="8:00AM" readonly> ' +
-        '&nbsp;<strong>End Time</strong> <input type="text" size="7" value="6:00PM" readonly> ' +
-        '&nbsp;<button class="ps-btn slim" onclick="render()">Refresh Calendar</button>' +
-      '</div></div>' +
-      '<div class="req-sub">Schedule</div>' + calendar();
-  }
-
-  document.getElementById('main-content').innerHTML =
-    idRowHtml() + tabsHtml('Enroll') +
-    '<div class="subnav"><span class="current">My Class Schedule</span>' +
-      '<span class="sep">|</span><a href="academic-requirements.html?_c=6">Add</a>' +
-      '<span class="sep">|</span><a href="#">Swap</a>' +
-      '<span class="sep">|</span><a href="#">Term Information</a></div>' +
-    '<h1 class="page-title">My Class Schedule</h1>' +
-    '<div class="optrow"><strong>Select Display Option</strong>' +
-      '<label><input type="radio" name="disp" ' + (view === 'list' ? 'checked' : '') +
-        ' onchange="setView(\'list\')"> List View</label>' +
-      '<label><input type="radio" name="disp" ' + (view === 'week' ? 'checked' : '') +
-        ' onchange="setView(\'week\')"> Weekly Calendar View</label>' +
-    '</div>' +
-    body +
-    '<p class="go-top"><a href="#">Go to top</a></p>';
-}
-
-function setView(v) { view = v; render(); }
-function shiftWeek(n) { weekOffset += n; render(); }
-
-render();
-</script>
+<!-- Order is load-bearing: each module captures the previous ones' exports
+     when it runs, so the shared set must load before the page script. -->
+<script src="assets/js/dom.js?v=15"></script>
+<script src="assets/js/catalog.js?v=15"></script>
+<script src="assets/js/store.js?v=15"></script>
+<script src="assets/js/schedule.js?v=15"></script>
+<script src="assets/js/components.js?v=15"></script>
+<script src="assets/js/chrome.js?v=15"></script>
+<script src="assets/js/pages/weekly-schedule.js?v=15"></script>
+<script src="assets/js/demo.js?v=15"></script>
 </body>
 </html>

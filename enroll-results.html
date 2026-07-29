@@ -6,185 +6,21 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Add Classes</title>
-<link rel="stylesheet" href="chrome.css?v=6">
+<title>ERP Demo</title>
+<link rel="stylesheet" href="assets/css/erp.css?v=15">
 </head>
 <body>
 <div id="chrome-root"></div>
-<script src="data.js?v=6"></script>
-<script src="chrome.js?v=6"></script>
-<script>
-renderChrome({ active: 'add-classes', pageName: 'Registration' });
 
-// 3-step PeopleSoft wizard. Step 1 walks the cart one course at a time;
-// nothing is enrolled until Finish Registration on step 2.
-var step = 1;
-var idx = 0;                 // which cart course step 1 is showing
-var cart = getCart();
-var justEnrolled = [];       // snapshot used to render step 3
-
-function chips(active) {
-  return '<div class="stepchips">' +
-    [1, 2, 3].map(function (n) {
-      return '<span class="chip' + (n === active ? ' active' : '') + '">' + n + '</span>';
-    }).join('<span class="dash"></span>') +
-  '</div>';
-}
-
-function shell(inner) {
-  document.getElementById('main-content').innerHTML =
-    idRowHtml() + tabsHtml('Plan') +
-    '<div class="subnav"><span class="current">Shopping Cart</span>' +
-      '<span class="sep">|</span><a href="#">Course History</a></div>' +
-    '<h1 class="page-title">Shopping Cart</h1>' + chips(step) + inner +
-    '<p class="go-top"><a href="#">Go to top</a></p>';
-}
-
-function sectionsOf(entry) {
-  var c = COURSES[entry.courseId];
-  return c.components.map(function (comp) {
-    var s = entry.sections[comp.type];
-    if (typeof s === 'string') s = c.sections[comp.type].find(function (x) { return x.id === s; });
-    return { comp: comp.type, s: s };
-  });
-}
-
-// ---------- step 1: Select classes to add - Enrollment Preferences ----------
-function renderStep1() {
-  if (!cart.length) {
-    shell('<p style="margin-left:8px;">Your shopping cart is empty. ' +
-      '<a href="academic-requirements.html?_c=6">Add a class first</a>.</p>');
-    return;
-  }
-  var entry = cart[idx];
-  var c = COURSES[entry.courseId];
-  var parts = sectionsOf(entry);
-
-  shell(
-    '<h2 class="page-title" style="border:none;">1. Select classes to add - Enrollment Preferences</h2>' +
-    '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '<br>' +
-      c.code + ' - ' + c.name + '</p>' +
-    '<div class="panel"><div class="panel-title">Class Preferences</div><div class="panel-body">' +
-      '<div class="twoup" style="margin:0;">' +
-        '<div>' +
-          parts.map(function (p) {
-            return '<p>' + c.code.split(' ')[0] + ' &nbsp; ' + c.code.split(' ')[1] + '-' + p.s.id +
-              ' &nbsp; ' + COMP_NAME[p.comp] + ' &nbsp; ' + statusCellHtml(p.s.status) +
-              (p.s.status === 'open' ? 'Open' : p.s.status === 'wait' ? 'Wait List' : 'Closed') + '</p>';
-          }).join('') +
-          '<p style="margin-top:14px;"><strong>Session</strong> &nbsp; Regular Session<br>' +
-            '<strong>Career</strong> &nbsp; First Degree</p>' +
-        '</div>' +
-        '<div>' +
-          '<p><strong>Permission Nbr</strong> <input type="text" size="8"></p>' +
-          '<p><strong>Grading</strong> &nbsp; Course Grading</p>' +
-          '<p><strong>Units</strong> &nbsp; ' + c.units.toFixed(2) + '</p>' +
-        '</div>' +
-      '</div>' +
-    '</div></div>' +
-    '<div class="cart-actions">' +
-      '<button class="ps-btn" onclick="location.href=\'shopping-cart.html?_c=6\'">Cancel</button>' +
-      '<button class="ps-btn" ' + (idx === 0 ? 'disabled' : '') + ' onclick="prevCourse()">Previous</button>' +
-      '<button class="ps-btn primary" onclick="nextCourse()">Next</button>' +
-    '</div>' +
-    '<p style="text-align:center;color:#555;">Class ' + (idx + 1) + ' of ' + cart.length + '</p>' +
-    '<div class="grid-scroll" style="margin-top:14px;"><table class="data">' +
-      '<thead><tr><th>Section</th><th>Component</th><th>Days &amp; Times</th>' +
-      '<th>Room</th><th>Instructor</th><th>Start/End Date</th></tr></thead>' +
-      '<tbody>' + parts.map(function (p) {
-        return '<tr><td>' + p.s.id + '</td><td>' + COMP_NAME[p.comp] + '</td>' +
-          '<td>' + p.s.days + ' ' + p.s.time + '</td><td>' + p.s.room + '</td>' +
-          '<td>' + p.s.instructor + '</td><td>03/08/2026 - 12/12/2026</td></tr>';
-      }).join('') + '</tbody>' +
-    '</table></div>');
-}
-
-function prevCourse() { if (idx > 0) { idx--; renderStep1(); } }
-function nextCourse() {
-  if (idx < cart.length - 1) { idx++; renderStep1(); }
-  else { step = 2; renderStep2(); }
-}
-
-// ---------- step 2: Confirm classes ----------
-function renderStep2() {
-  var rows = '';
-  cart.forEach(function (entry) {
-    var c = COURSES[entry.courseId];
-    sectionsOf(entry).forEach(function (p, i) {
-      rows += '<tr><td>' + c.code + '-' + p.s.id + '<br>(' + p.s.nbr + ')</td>' +
-        '<td>' + c.name + '<br>(' + COMP_NAME[p.comp] + ')</td>' +
-        '<td>' + p.s.days + ' ' + p.s.time + '</td><td>' + p.s.room + '</td>' +
-        '<td>' + p.s.instructor + '</td>' +
-        '<td class="num">' + (i === 0 ? c.units.toFixed(2) : '') + '</td>' +
-        '<td class="center">' + statusCellHtml(p.s.status) + '</td></tr>';
-    });
-  });
-
-  shell(
-    '<h2 class="page-title" style="border:none;">2. Confirm classes</h2>' +
-    '<p class="breadcrumb">Click Finish Registration to process your request for the classes listed below.</p>' +
-    '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +
-    statusLegendHtml() +
-    '<div class="grid-scroll" style="margin-left:8px;"><table class="data">' +
-      '<thead><tr><th>Class</th><th>Description</th><th>Days/Times</th><th>Room</th>' +
-      '<th>Instructor</th><th>Units</th><th>Status</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody>' +
-    '</table></div>' +
-    '<div class="cart-actions">' +
-      '<button class="ps-btn" onclick="location.href=\'shopping-cart.html?_c=6\'">Cancel</button>' +
-      '<button class="ps-btn" onclick="backToStep1()">Previous</button>' +
-      '<button class="ps-btn primary" onclick="finishRegistration()">Finish Registration</button>' +
-    '</div>');
-}
-
-function backToStep1() { step = 1; idx = cart.length - 1; renderStep1(); }
-
-function finishRegistration() {
-  var enrolled = getEnrolled();
-  cart.forEach(function (entry) {
-    var c = COURSES[entry.courseId];
-    // store resolved section objects so later pages don't have to re-look them up
-    var resolved = {};
-    sectionsOf(entry).forEach(function (p) { resolved[p.comp] = p.s; });
-    if (!enrolled.some(function (e) { return e.courseId === entry.courseId; })) {
-      enrolled.push({ courseId: entry.courseId, sections: resolved });
-    }
-  });
-  saveEnrolled(enrolled);
-  justEnrolled = cart.slice();
-  saveCart([]);
-  step = 3;
-  renderStep3();
-}
-
-// ---------- step 3: View results ----------
-function renderStep3() {
-  var rows = justEnrolled.map(function (entry) {
-    var parts = COURSES[entry.courseId].code.split(' ');
-    return '<tr><td>' + parts[0] + '</td><td>' + parts[1] + '</td>' +
-      '<td><strong>Success:</strong> This class has been added to your schedule</td>' +
-      '<td class="center"><span class="chk">&#10003;</span></td></tr>';
-  }).join('') || '<tr><td colspan="4" style="padding:16px;">No classes were in the cart.</td></tr>';
-
-  shell(
-    '<h2 class="page-title" style="border:none;">3. View results</h2>' +
-    '<p class="breadcrumb">View the following status report for enrollment confirmations and errors</p>' +
-    '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '</p>' +
-    '<div class="legend">' +
-      '<span><span class="chk">&#10003;</span> Success: enrolled</span>' +
-      '<span><span class="xmark">&#10008;</span> Error: unable to add class</span>' +
-    '</div>' +
-    '<div class="grid-scroll" style="margin-left:8px;"><table class="data">' +
-      '<thead><tr><th colspan="2">Class</th><th>Message</th><th>Status</th></tr></thead>' +
-      '<tbody>' + rows + '</tbody>' +
-    '</table></div>' +
-    '<div class="cart-actions">' +
-      '<button class="ps-btn" onclick="location.href=\'weekly-schedule.html?_c=6\'">My Class Schedule</button>' +
-      '<button class="ps-btn" onclick="location.href=\'academic-requirements.html?_c=6\'">Add Another Class</button>' +
-    '</div>');
-}
-
-renderStep1();
-</script>
+<!-- Order is load-bearing: each module captures the previous ones' exports
+     when it runs, so the shared set must load before the page script. -->
+<script src="assets/js/dom.js?v=15"></script>
+<script src="assets/js/catalog.js?v=15"></script>
+<script src="assets/js/store.js?v=15"></script>
+<script src="assets/js/schedule.js?v=15"></script>
+<script src="assets/js/components.js?v=15"></script>
+<script src="assets/js/chrome.js?v=15"></script>
+<script src="assets/js/pages/enroll-results.js?v=15"></script>
+<script src="assets/js/demo.js?v=15"></script>
 </body>
 </html>

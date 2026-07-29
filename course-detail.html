@@ -6,162 +6,21 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Course Detail</title>
-<link rel="stylesheet" href="chrome.css?v=6">
+<title>ERP Demo</title>
+<link rel="stylesheet" href="assets/css/erp.css?v=15">
 </head>
 <body>
 <div id="chrome-root"></div>
-<script src="data.js?v=6"></script>
-<script src="chrome.js?v=6"></script>
-<script>
-renderChrome({ active: 'academic-requirements', pageName: 'Registration' });
 
-var params = new URLSearchParams(location.search);
-var courseId = params.get('course') || COURSE_ORDER[0];
-var course = COURSES[courseId];
-var justAdded = params.get('added');
-var showSections = params.get('sections') === '1';
-
-// The "added to cart" confirmation is a banner + modal the first time this page loads
-// after Enrollment Preferences; strip the flags so a refresh doesn't re-show them.
-var showModal = params.get('modal') === '1';
-var showBanner = params.get('added') === '1';
-if (showModal || showBanner) {
-  if (showModal) params.delete('modal');
-  if (showBanner) params.delete('added');
-  var qs = params.toString();
-  history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
-}
-
-// The first listed component is the one picked from the Section list below;
-// any further components are picked on the Related Class Sections screen.
-var primary = course.components[0].type;
-
-function sectionBlock(s) {
-  var disabled = s.status === 'closed' ? 'disabled' : '';
-  return '<div class="sec-block">' +
-    '<div class="grid-title">Section</div>' +
-    '<table class="data">' +
-      '<thead><tr><th>Section</th><th>Session</th><th>FN/AN</th><th>Exam Date</th>' +
-      '<th>Status</th><th></th></tr></thead>' +
-      '<tbody><tr>' +
-        '<td>' + s.id + '-' + COMP_ABBR[primary] + ' (' + s.nbr + ')</td>' +
-        '<td>H</td><td>' + (s.fnan || '') + '</td><td>' + (s.exam || '') + '</td>' +
-        '<td class="center">' + statusCellHtml(s.status) + '</td>' +
-        '<td class="center"><button class="ps-btn slim" ' + disabled +
-          ' onclick="selectSection(\'' + s.id + '\')">Select</button></td>' +
-      '</tr></tbody>' +
-    '</table>' +
-    '<div class="sec-details">' +
-      '<div class="grid-title">Section Details</div>' +
-      '<table class="data">' +
-        '<thead><tr><th>Days</th><th>Start</th><th>End</th><th>Room</th>' +
-        '<th>Instructor</th><th>Dates</th></tr></thead>' +
-        '<tbody><tr>' +
-          '<td>' + s.days + '</td>' +
-          '<td>' + s.time.split(' - ')[0] + '</td>' +
-          '<td>' + s.time.split(' - ')[1] + '</td>' +
-          '<td>' + s.room + '</td>' +
-          '<td>' + s.instructor + '</td>' +
-          '<td>03/08/2026 - 12/12/2026</td>' +
-        '</tr></tbody>' +
-      '</table>' +
-    '</div>' +
-  '</div>';
-}
-
-function sectionsHtml() {
-  var secs = course.sections[primary] || [];
-  return schedulePanelsHtml() +
-    weeklyGridHtml(scheduleBlocks(getEnrolled().concat(getCart()))) +
-    statusLegendHtml() +
-    '<div class="req-sub">' + course.code + ' Sections for ' + TERM + '</div>' +
-    '<p class="grid-nav" style="text-align:right;">1-' + secs.length + ' of ' + secs.length + '</p>' +
-    secs.map(sectionBlock).join('');
-}
-
-function bannerHtml() {
-  if (!justAdded) return '';
-  return '<div class="confirm-banner"><span class="chk">&#10003;</span><div>' +
-    '<strong>' + course.code + '</strong> has been added to your Shopping Cart.<br>' +
-    'To enroll in classes from your ' + TERM + ' Shopping Cart, ' +
-    '<a href="shopping-cart.html?_c=6">select here</a>.' +
-  '</div></div>';
-}
-
-function addedModalHtml() {
-  if (!showModal) return '';
-  var parts = course.code.split(' ');
-  return '<div class="modal-overlay" id="addedModal"><div class="modal-box">' +
-    '<p>' + parts[0] + '&nbsp;&nbsp;&nbsp;' + parts[1] +
-    ' has been added to your Shopping Cart. To Register in this course you need to go to ' +
-    'Registration Course Cart and click on register button. (0,0)</p>' +
-    '<div class="modal-actions"><button class="ps-btn" onclick="closeAddedModal()">OK</button></div>' +
-  '</div></div>';
-}
-
-function closeAddedModal() {
-  var m = document.getElementById('addedModal');
-  if (m) m.remove();
-}
-
-function render() {
-  var cartEntry = getCart().find(function (c) { return c.courseId === courseId; });
-  var isFilled = !!cartEntry;
-  var visibleSections = showSections || isFilled;
-
-  document.getElementById('main-content').innerHTML =
-    idRowHtml() + tabsHtml('My Academics') +
-    '<div class="subnav"><a href="academic-requirements.html?_c=6">My Academic Requirements</a></div>' +
-    '<h1 class="page-title">Course Detail</h1>' +
-    bannerHtml() +
-    '<p><a href="academic-requirements.html?_c=6">Return to My Academic Requirements</a></p>' +
-    '<p class="breadcrumb">' + course.code + ' - ' + course.name + '</p>' +
-    '<div class="panel"><div class="panel-title">Course Detail</div><div class="panel-body">' +
-      '<div class="twoup" style="margin:0;">' +
-        '<div>' +
-          '<p><strong>Career</strong> &nbsp; First Degree</p>' +
-          '<p><strong>Units</strong> &nbsp; ' + course.units.toFixed(2) + '</p>' +
-          '<p><strong>Grading Basis</strong> &nbsp; Course Grading</p>' +
-          '<p><strong>Course Components</strong><br>' +
-            course.components.map(function (c) {
-              return '&nbsp;&nbsp;' + COMP_NAME[c.type] + ' &nbsp; ' + (c.required ? 'Required' : 'Optional');
-            }).join('<br>') + '</p>' +
-          '<p><strong>Campus</strong> &nbsp; Pilani Campus</p>' +
-          '<p><strong>Academic Group</strong> &nbsp; ' + course.acadGroup + '</p>' +
-          '<p><strong>Academic Organization</strong> &nbsp; ' + course.dept + '</p>' +
-        '</div>' +
-        '<div><button class="ps-btn" onclick="reveal()">' +
-          (isFilled ? 'View/Edit Sections' : 'View Class Sections') + '</button></div>' +
-      '</div>' +
-    '</div></div>' +
-    '<h2 class="page-title">Course Schedule</h2>' +
-    '<div class="btn-row">' +
-      '<label><strong>*Terms Offered</strong> ' +
-        '<select><option>' + TERM + '</option></select></label>' +
-      '<button class="ps-btn" onclick="reveal()">Show Sections</button>' +
-    '</div>' +
-    '<div id="sectionsArea">' + (visibleSections ? sectionsHtml() : '') + '</div>' +
-    addedModalHtml() +
-    '<p><a href="academic-requirements.html?_c=6">Return to My Academic Requirements</a></p>' +
-    '<p class="go-top"><a href="#">Go to top</a></p>';
-}
-
-function reveal() {
-  document.getElementById('sectionsArea').innerHTML = sectionsHtml();
-}
-
-function selectSection(secId) {
-  var pending = { courseId: courseId, sections: {} };
-  pending.sections[primary] = secId;
-  savePending(pending);
-  var q = pendingQuery(pending) + '&_c=6';
-  location.href = course.components.length > 1
-    ? 'related-sections.html?' + q
-    : 'enrollment-preferences.html?' + q;
-}
-
-render();
-</script>
+<!-- Order is load-bearing: each module captures the previous ones' exports
+     when it runs, so the shared set must load before the page script. -->
+<script src="assets/js/dom.js?v=15"></script>
+<script src="assets/js/catalog.js?v=15"></script>
+<script src="assets/js/store.js?v=15"></script>
+<script src="assets/js/schedule.js?v=15"></script>
+<script src="assets/js/components.js?v=15"></script>
+<script src="assets/js/chrome.js?v=15"></script>
+<script src="assets/js/pages/course-detail.js?v=15"></script>
+<script src="assets/js/demo.js?v=15"></script>
 </body>
 </html>

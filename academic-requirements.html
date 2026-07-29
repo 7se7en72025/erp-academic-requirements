@@ -6,147 +6,21 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Academic Requirements</title>
-<link rel="stylesheet" href="chrome.css?v=6">
+<title>ERP Demo</title>
+<link rel="stylesheet" href="assets/css/erp.css?v=15">
 </head>
 <body>
 <div id="chrome-root"></div>
-<script src="data.js?v=6"></script>
-<script src="chrome.js?v=6"></script>
-<script>
-renderChrome({ active: 'academic-requirements', pageName: 'Registration' });
 
-var enrolledIds = getEnrolled().map(function (e) { return e.courseId; });
-var cartIds = getCart().map(function (c) { return c.courseId; });
-
-function whenCell(id) {
-  if (enrolledIds.indexOf(id) > -1) return TERM;
-  if (cartIds.indexOf(id) > -1) return TERM;
-  return '';
-}
-function statusCell(id) {
-  if (enrolledIds.indexOf(id) > -1) return '<span class="chk">&#10003;</span>';
-  if (cartIds.indexOf(id) > -1) return '<span class="diamond"></span>';
-  return '';
-}
-
-function gridHtml(rowsHtml, count) {
-  return '<div class="grid">' +
-    '<div class="grid-title">The following courses may be used to satisfy this requirement:</div>' +
-    '<div class="grid-nav">' +
-      '<a href="#">Personalize</a> | <a href="#">View All</a> | <a href="#">&#8663;</a>' +
-      '<span class="pager">First <span class="pg">&#9664;</span> <strong>1-' + count + ' of ' + count + '</strong> ' +
-      '<span class="pg">&#9654;</span> Last</span>' +
-    '</div>' +
-    '<div class="grid-scroll"><table class="data">' +
-      '<thead><tr><th>Course</th><th>Description</th><th class="num">Units</th>' +
-      '<th>When</th><th>Grade</th><th>Status</th></tr></thead>' +
-      '<tbody>' + rowsHtml + '</tbody>' +
-    '</table></div>' +
-  '</div>';
-}
-
-function semesterHtml(sem, idx) {
-  var rows, count, taken;
-  if (sem.courseIds) {
-    count = sem.courseIds.length;
-    taken = sem.courseIds.filter(function (id) { return enrolledIds.indexOf(id) > -1; }).length;
-    rows = sem.courseIds.map(function (id) {
-      var c = COURSES[id];
-      return '<tr><td>' + c.code + '</td>' +
-        '<td><a href="course-detail.html?course=' + id + '&_c=6">' + c.name + '</a></td>' +
-        '<td class="num">' + c.units.toFixed(2) + '</td>' +
-        '<td>' + whenCell(id) + '</td><td></td>' +
-        '<td class="center">' + statusCell(id) + '</td></tr>';
-    }).join('');
-  } else {
-    count = sem.courses.length;
-    taken = 0;
-    rows = sem.courses.map(function (c) {
-      return '<tr><td>' + c.code + '</td>' +
-        '<td><a href="#">' + c.name + '</a></td>' +
-        '<td class="num">' + c.units.toFixed(2) + '</td>' +
-        '<td></td><td></td><td></td></tr>';
-    }).join('');
-  }
-
-  var bodyId = 'sem-' + idx;
-  var arrow = sem.open ? '&#9660;' : '&#9654;';
-  return '<div class="req-sub click" data-target="' + bodyId + '">' +
-      '<span class="arrow">' + arrow + '</span> ' + sem.name +
-    '</div>' +
-    '<div class="req-body' + (sem.open ? '' : ' hidden') + '" id="' + bodyId + '">' +
-      '<p class="status-line"><strong>Not Satisfied:</strong> All courses are compulsory.</p>' +
-      '<ul class="reqs"><li>Courses: ' + sem.required + ' required, ' + taken +
-        ' taken, ' + (sem.required - taken) + ' needed</li></ul>' +
-      gridHtml(rows, count) +
-    '</div>';
-}
-
-var totalTaken = enrolledIds.length;
-var unitsTaken = getEnrolled().reduce(function (sum, e) { return sum + COURSES[e.courseId].units; }, 0);
-
-document.getElementById('main-content').innerHTML =
-  idRowHtml() +
-  tabsHtml('My Academics') +
-  '<h1 class="page-title">My Academic Requirements</h1>' +
-  '<p class="breadcrumb">' + STUDENT.campus + '</p>' +
-  '<p class="generated"><strong>This report last generated on</strong>' +
-    '<span class="when">' + new Date().toLocaleString('en-GB', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: 'numeric', minute: '2-digit', hour12: true
-    }).replace(',', ' ') + '</span></p>' +
-  '<div class="btn-row">' +
-    '<button class="ps-btn" id="collapseAll">Collapse All</button>' +
-    '<button class="ps-btn" id="expandAll">Expand All</button>' +
-    '<button class="ps-btn" onclick="window.print()">View Report as PDF</button>' +
-  '</div>' +
-  '<div class="legend">' +
-    '<span><span class="chk">&#10003;</span> Taken</span>' +
-    '<span><span class="diamond"></span> In Progress</span>' +
-    '<span><span class="star">&#9733;</span> Planned</span>' +
-  '</div>' +
-  '<div class="reqgroup">' +
-    '<div class="req-head" data-target="grp-plan"><span class="arrow">&#9660;</span> ' + PROGRAM.plan + '</div>' +
-    '<div class="req-body" id="grp-plan">' +
-      '<p class="status-line"><strong>Not Satisfied:</strong> ' + PROGRAM.plan + '</p>' +
-      '<div class="req-sub">' + PROGRAM.subplan + '</div>' +
-      '<div class="req-body">' +
-        '<p class="status-line"><strong>Not Satisfied:</strong> ' + PROGRAM.subplan + '</p>' +
-        '<ul class="reqs">' +
-          '<li>Units: ' + PROGRAM.unitsRequired.toFixed(2) + ' required, ' + unitsTaken.toFixed(2) +
-            ' taken, ' + (PROGRAM.unitsRequired - unitsTaken).toFixed(2) + ' needed</li>' +
-          '<li>Courses: ' + PROGRAM.coursesRequired + ' required, ' + totalTaken +
-            ' taken, ' + (PROGRAM.coursesRequired - totalTaken) + ' needed</li>' +
-          '<li>GPA: ' + PROGRAM.gpaRequired + ' required, 0.000 actual</li>' +
-        '</ul>' +
-        PROGRAM.semesters.map(semesterHtml).join('') +
-      '</div>' +
-    '</div>' +
-  '</div>' +
-  '<p class="go-top"><a href="#">&#9650; Go to top</a></p>';
-
-function setOpen(headEl, open) {
-  var body = document.getElementById(headEl.dataset.target);
-  if (!body) return;
-  body.classList.toggle('hidden', !open);
-  var arrow = headEl.querySelector('.arrow');
-  if (arrow) arrow.innerHTML = open ? '&#9660;' : '&#9654;';
-}
-
-document.querySelectorAll('[data-target]').forEach(function (head) {
-  head.addEventListener('click', function () {
-    var body = document.getElementById(head.dataset.target);
-    setOpen(head, body.classList.contains('hidden'));
-  });
-});
-
-document.getElementById('collapseAll').onclick = function () {
-  document.querySelectorAll('[data-target]').forEach(function (h) { setOpen(h, false); });
-};
-document.getElementById('expandAll').onclick = function () {
-  document.querySelectorAll('[data-target]').forEach(function (h) { setOpen(h, true); });
-};
-</script>
+<!-- Order is load-bearing: each module captures the previous ones' exports
+     when it runs, so the shared set must load before the page script. -->
+<script src="assets/js/dom.js?v=15"></script>
+<script src="assets/js/catalog.js?v=15"></script>
+<script src="assets/js/store.js?v=15"></script>
+<script src="assets/js/schedule.js?v=15"></script>
+<script src="assets/js/components.js?v=15"></script>
+<script src="assets/js/chrome.js?v=15"></script>
+<script src="assets/js/pages/academic-requirements.js?v=15"></script>
+<script src="assets/js/demo.js?v=15"></script>
 </body>
 </html>

@@ -6,97 +6,21 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Add to Shopping Cart - Related Class Sections</title>
-<link rel="stylesheet" href="chrome.css?v=6">
+<title>ERP Demo</title>
+<link rel="stylesheet" href="assets/css/erp.css?v=15">
 </head>
 <body>
 <div id="chrome-root"></div>
-<script src="data.js?v=6"></script>
-<script src="chrome.js?v=6"></script>
-<script>
-renderChrome({ active: 'academic-requirements', pageName: 'Registration' });
 
-var pending = readPending();
-if (!pending) location.replace('academic-requirements.html?_c=6');
-
-var course = COURSES[pending.courseId];
-var primary = course.components[0].type;
-var related = course.components[1].type;          // the component still to pick
-var chosenPrimary = course.sections[primary].find(function (s) { return s.id === pending.sections[primary]; });
-var picked = pending.sections[related] || null;
-
-function rows() {
-  return course.sections[related].map(function (s) {
-    var disabled = s.status === 'closed' ? 'disabled' : '';
-    return '<tr class="' + (picked === s.id ? 'picked' : '') + '">' +
-      '<td class="pick"><input type="radio" name="rel" value="' + s.id + '" ' +
-        (picked === s.id ? 'checked' : '') + ' ' + disabled +
-        ' onchange="pick(\'' + s.id + '\')"></td>' +
-      '<td>' + s.nbr + '</td>' +
-      '<td>' + s.id + '</td>' +
-      '<td>' + s.days + ' ' + s.time + '</td>' +
-      '<td>' + s.room + '</td>' +
-      '<td>' + s.instructor + '</td>' +
-      '<td class="center">' + statusCellHtml(s.status) + '</td>' +
-    '</tr>';
-  }).join('');
-}
-
-// The grid shows everything already committed plus the section just selected,
-// so a clash is visible before the pick is made.
-function gridBlocks() {
-  var provisional = { courseId: pending.courseId, sections: {} };
-  provisional.sections[primary] = chosenPrimary;
-  if (picked) provisional.sections[related] = picked;
-  return scheduleBlocks(getEnrolled().concat(getCart()).concat([provisional]));
-}
-
-function render() {
-  var n = course.sections[related].length;
-  document.getElementById('main-content').innerHTML =
-    idRowHtml() + tabsHtml('My Academics') +
-    '<div class="subnav"><a href="academic-requirements.html?_c=6">My Academic Requirements</a></div>' +
-    '<h1 class="page-title">Add to Shopping Cart - Related Class Sections</h1>' +
-    weeklyGridHtml(gridBlocks(), true) +
-    '<p class="breadcrumb">' + TERM + ' | ' + STUDENT.campus + '<br>' +
-      course.code + ' - ' + course.name + '</p>' +
-    '<p style="margin-left:22px;"><strong>' + COMP_NAME[primary] + ' selected</strong> &nbsp; Section ' +
-      chosenPrimary.id + '<br><span style="margin-left:130px;">' +
-      chosenPrimary.days + ' ' + chosenPrimary.time + ' &nbsp; Room ' + chosenPrimary.room + '</span></p>' +
-    statusLegendHtml() +
-    '<div class="grid">' +
-      '<div class="grid-title">Select ' + COMP_NAME[related] + ' section (Required):</div>' +
-      '<div class="grid-nav"><span class="pager">1-' + n + ' of ' + n + '</span></div>' +
-      '<div class="grid-scroll"><table class="data">' +
-        '<thead><tr><th></th><th>Class Nbr</th><th>Section</th><th>Schedule</th>' +
-        '<th>Room</th><th>Instructor</th><th>Status</th></tr></thead>' +
-        '<tbody>' + rows() + '</tbody>' +
-      '</table></div>' +
-    '</div>' +
-    '<div class="cart-actions">' +
-      '<button class="ps-btn" onclick="cancel()">Cancel</button>' +
-      '<button class="ps-btn" id="nextBtn" onclick="next()">Next</button>' +
-    '</div>' +
-    '<p class="go-top"><a href="#">Go to top</a></p>';
-
-  document.getElementById('nextBtn').disabled = !picked;
-}
-
-function pick(id) { picked = id; render(); }
-
-function next() {
-  if (!picked) return;
-  pending.sections[related] = picked;
-  savePending(pending);
-  location.href = 'enrollment-preferences.html?' + pendingQuery(pending) + '&_c=6';
-}
-
-function cancel() {
-  clearPending();
-  location.href = 'course-detail.html?course=' + pending.courseId + '&sections=1&_c=6';
-}
-
-render();
-</script>
+<!-- Order is load-bearing: each module captures the previous ones' exports
+     when it runs, so the shared set must load before the page script. -->
+<script src="assets/js/dom.js?v=15"></script>
+<script src="assets/js/catalog.js?v=15"></script>
+<script src="assets/js/store.js?v=15"></script>
+<script src="assets/js/schedule.js?v=15"></script>
+<script src="assets/js/components.js?v=15"></script>
+<script src="assets/js/chrome.js?v=15"></script>
+<script src="assets/js/pages/related-sections.js?v=15"></script>
+<script src="assets/js/demo.js?v=15"></script>
 </body>
 </html>

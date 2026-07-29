@@ -1,0 +1,663 @@
+/* ===== Shared BITS ERP (PeopleSoft) chrome + page styling =====
+
+   Kept in step with ../../chrome.css, which the walkthrough pages load. This
+   copy adds the landing page, the autoplay overlay and a few refinements the
+   walkthrough pages do not use; everything above those sections should match.
+
+   Colours and metrics below are lifted from the real portal's own stylesheets
+   rather than eyeballed:
+
+   - the Fluid chrome (header bar, tiles, activity-guide sidebar) comes from
+     PSSTYLEDEF_FMODE, PTNUI_LANDING_CSS and PTGP_GUIDED_PROCESS_CSS;
+   - the classic content area (group bands, grids, links) comes from
+     PSSTYLEDEF_TANGERINE, which is what the registration pages still render in.
+
+   Keep the two families distinct when editing: the chrome is Fluid blue
+   (#246FC7), the page body is classic navy (#004b91) with tangerine headings. */
+
+:root {
+  /* --- Fluid chrome --- */
+  --nav-bg: #1d2733;          /* .ps_header_bar */
+  --nav-rule-a: #b4ec51;      /* .ps_header_bar-container:before, left stop */
+  --nav-rule-b: #53a0fd;      /* ...right stop */
+  --fluid-link: #246fc7;
+  --tile-border: #ced4da;
+  --tile-title: #1e5ca4;      /* .nuitile .ps_groupleth > .ps-label */
+  --page-bg: #eff1f4;         /* #PT_WRAPPER, the homepage backdrop */
+  --side-bg: #f8f8f8;         /* #PT_SIDE */
+  --footer-bg: rgba(29, 39, 51, .48);  /* .lpfooter */
+
+  /* --- activity-guide sidebar (.ps_ag-*) --- */
+  --side-active: #c8ead6;
+  --side-hover: #f4f7fc;
+  --side-press: #c4d7e6;
+  --side-line: #ced4da;
+
+  /* --- classic content --- */
+  --orange: #ab5b1a;          /* .PSGROUPBOXLABEL */
+  --band-bg: #f1f5f6;
+  --band-border: #c9ced5;
+  --link: #004b91;            /* .PSHYPERLINK */
+  --link-hover: #ab5b1a;
+  --text: #515151;            /* .PSTEXT / grid rows */
+  --grid-hdr-bg: #f9f9f9;     /* .PSLEVEL1SSGRIDCOLUMNHDR */
+  --grid-hdr-fg: #336699;
+  --grid-hdr-line: #cbcbcb;   /* ...its top/bottom rule, darker than the body */
+  --grid-line: #e6e6e6;
+  --pagetitle: #446590;       /* .PAPAGETITLE */
+  --row-alt: #f9f9f9;
+  --pager: #426a92;           /* .PSGRIDCOUNTER */
+  --tan-bg: #fceace;
+  --tan-border: #e0c9a6;
+
+  --blue: #246fc7;
+  --border: #c9ced5;
+  --border-light: #e6e6e6;
+  --head-bg: #f1f5f6;
+  --green: #3a9c3f;
+  --active-bg: #c8ead6;
+  --warning-bg: #7c1d1d;
+  --warning-link: #ffd7a8;
+  --sidebar-w: 288px;
+  --header-h: 46px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: #fff;
+  color: #000;
+  font-family: Arial, Helvetica, sans-serif;
+  /* The Fluid chrome sizes everything off an 11pt root (PSSTYLEDEF_FMODE
+     `body`), which is why the header and sidebar metrics below are in em.
+     The classic content area resets to 9pt in `.main` -- in the real portal
+     that content is a separate document inside an iframe, so the two scales
+     never actually meet. */
+  font-size: 11pt;
+}
+
+/* ---- the standing disclaimer --------------------------------------------
+   Deliberately the first thing on every page and the loudest thing on it.
+   Everything below this rule is a close copy of a portal students really sign
+   in to, so this bar is what keeps the copy honest. It is not dismissible. */
+.disclaimer {
+  background: var(--warning-bg);
+  color: #fff;
+  font-size: 12.5px;
+  line-height: 1.55;
+  padding: 10px 18px;
+  border-bottom: 2px solid #4a0f0f;
+}
+.disclaimer a { color: var(--warning-link); }
+.disclaimer a:hover { color: #fff; }
+
+/* ---- thin gradient rule + SISPRD strip ----
+   The rule sits above the header bar in the real portal and runs green to
+   blue, not blue to green. */
+.topline { height: 4px; background: linear-gradient(to right, var(--nav-rule-a) 0%, var(--nav-rule-b) 100%); }
+.sisprd {
+  font-size: 12px;
+  color: #222;
+  padding: 3px 14px;
+  background: #fff;
+  letter-spacing: .3px;
+}
+
+/* ---- dark header bar ---- */
+.appheader {
+  display: flex;
+  align-items: center;
+  background: var(--nav-bg);
+  color: rgba(255, 255, 255, .95);
+  height: var(--header-h);
+  padding: 0 14px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.appheader .home-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 5px 12px 5px 8px;
+  border-radius: 1.2em;
+  white-space: nowrap;
+}
+.appheader .home-link img { width: 11px; height: 11px; display: block; }
+.appheader .home-link:hover { background: rgba(255, 255, 255, .35); }
+.appheader .home-link:active { background: rgba(0, 0, 0, .8); }
+.appheader .page-name {
+  flex: 1;
+  text-align: center;
+  font-size: 19px;
+  font-weight: normal;
+  color: #fff;
+  padding: 0 12px;
+}
+.appheader .icons { display: flex; align-items: center; gap: 14px; }
+.appheader .icons a {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; padding: 6px;
+  border-radius: 1.2em; text-decoration: none;
+}
+.appheader .icons a img { width: 100%; height: 100%; display: block; }
+.appheader .icons a:hover { background: rgba(255, 255, 255, .35); }
+.appheader .icons a:active { background: rgba(0, 0, 0, .8); }
+
+/* ---- layout shell ---- */
+.shell { display: flex; align-items: stretch; }
+
+/* ---- sidebar (the portal's vertical activity-guide step list) ---- */
+.sidebar {
+  width: var(--sidebar-w);
+  flex: 0 0 var(--sidebar-w);
+  background: var(--side-bg);
+  border-right: 1px solid var(--side-line);
+  min-height: calc(100vh - var(--header-h) - 24px);
+}
+.sidebar a.side-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 14px 8px 14px 12px;
+  color: #1f1f1f;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: bold;
+  border-bottom: 1px solid var(--side-line);
+}
+.sidebar a.side-item:hover { background: var(--side-hover); }
+.sidebar a.side-item:active { background: var(--side-press); }
+.sidebar a.side-item.active { background: var(--side-active); }
+.sidebar .side-icon { width: 20px; height: 20px; flex: 0 0 20px; }
+.sidebar .side-icon img,
+.sidebar .side-icon svg { width: 100%; height: 100%; display: block; }
+
+/* ---- main content ---- */
+/* 9pt is what nearly everything classic is set in -- .PSTEXT, grid rows,
+   .PSHYPERLINK. Setting it once here means the rules below only need to name
+   a size where the real stylesheet actually departs from it. */
+.main { flex: 1; min-width: 0; padding: 14px 24px 60px; max-width: 1080px; color: var(--text); font-size: 9pt; }
+.main a { color: var(--link); text-decoration: none; }
+.main a:hover { color: var(--link-hover); text-decoration: underline; }
+
+/* ---- student id row + go to ---- */
+.idrow {
+  display: flex;
+  align-items: flex-start;
+  gap: 26px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.idrow .sname { font-size: 14px; max-width: 210px; line-height: 1.35; }
+.idrow .idlabel { font-weight: bold; color: #333; }
+.idrow .idval { font-weight: normal; margin-left: 10px; color: var(--text); }
+.idrow .goto { display: flex; align-items: center; gap: 6px; }
+.idrow .goto select {
+  width: 160px; font-family: inherit; font-size: 12px;
+  padding: 2px; border: 1px solid #9aa7b3;
+}
+.idrow .goto .go-btn {
+  border: none; background: none; padding: 0;
+  cursor: pointer; line-height: 1;
+}
+.idrow .goto .go-btn img { width: 16px; height: 16px; display: block; }
+
+/* ---- tabs ---- */
+.tabs {
+  list-style: none; display: flex; gap: 4px;
+  margin: 0; padding: 0;
+  border-bottom: 1px solid var(--band-border);
+}
+.tabs li a {
+  display: block; padding: 4px 13px;
+  font-size: 12px; color: #6b6b6b; text-decoration: none;
+  border: 1px solid var(--band-border); border-bottom: none;
+  background: var(--band-bg);
+}
+.tabs li a:hover { color: var(--link-hover); text-decoration: none; }
+.tabs li.active a {
+  background: #fff; color: #000; font-weight: bold;
+  position: relative; top: 1px;
+}
+
+.subnav { padding: 6px 2px; font-size: 12px; border-bottom: 1px solid var(--band-border); margin-bottom: 6px; }
+.subnav .sep { color: #666; margin: 0 8px; }
+.subnav .current { font-weight: bold; color: #000; }
+
+.page-title {
+  font-size: 14pt; font-weight: normal; color: var(--pagetitle);
+  margin: 18px 0 6px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--grid-line);
+}
+.breadcrumb { color: var(--text); margin: 14px 0; }
+.generated { margin: 16px 0 16px 34px; }
+.generated .when { margin-left: 16px; }
+
+/* ---- tan buttons (classic .PSPUSHBUTTON) ---- */
+.btn-row { display: flex; gap: 32px; margin: 0 0 14px 8px; flex-wrap: wrap; }
+.ps-btn {
+  min-width: 178px; padding: 6px 12px;
+  font-family: inherit; font-size: 12.5px; color: #333;
+  background: var(--tan-bg); border: 1px solid var(--tan-border);
+  border-radius: 2px; cursor: pointer; text-align: center;
+  text-decoration: none; display: inline-block;
+}
+.ps-btn:hover { background: #fff3da; color: #333; text-decoration: none; }
+.ps-btn:disabled { opacity: .5; cursor: default; }
+.ps-btn.slim { min-width: 0; padding: 4px 14px; }
+.ps-btn.primary { font-weight: bold; }
+
+/* ---- status glyphs ----
+   The three requirement-status icons are the portal's own images (green tick,
+   amber diamond, blue star), so the shapes match exactly rather than being
+   approximated in CSS. font-size:0 hides the fallback character the pages
+   still write inside the span. */
+.chk, .diamond, .star {
+  display: inline-block; vertical-align: middle;
+  background-repeat: no-repeat; background-position: center;
+  font-size: 0; line-height: 0;
+}
+.chk {
+  width: 15px; height: 15px;
+  background-image: url("../img/status-taken.gif");
+}
+.diamond {
+  width: 15px; height: 15px;
+  background-image: url("../img/status-inprogress.gif");
+  transform: none;
+}
+.star {
+  width: 15px; height: 15px;
+  background-image: url("../img/status-planned.gif");
+}
+.xmark {
+  display: inline-block; width: 15px; height: 15px; border-radius: 50%;
+  background: #c0392b; color: #fff; font-size: 10px;
+  line-height: 15px; text-align: center; vertical-align: middle;
+}
+
+.legend {
+  display: flex; gap: 90px; align-items: center;
+  padding: 9px 14px; border: 1px solid var(--band-border);
+  margin: 0 0 16px 8px;
+}
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ---- requirement sections (classic .PSGROUPBOXLABEL bands) ---- */
+.reqgroup { margin-left: 8px; }
+.req-head {
+  color: var(--orange); font-weight: bold; font-size: 10pt;
+  background: var(--band-bg); border: 1px solid var(--band-border);
+  padding: 7px 12px; cursor: pointer; user-select: none;
+}
+.req-head .arrow { display: inline-block; width: 14px; }
+.req-body { border: 1px solid var(--band-border); border-top: none; padding: 4px 14px 14px; }
+.req-body.hidden { display: none; }
+
+.req-sub {
+  color: var(--orange); font-weight: bold; font-size: 10pt;
+  background: var(--band-bg); border: 1px solid var(--band-border);
+  padding: 7px 12px; margin: 14px 0 0;
+}
+.req-sub.click { cursor: pointer; user-select: none; }
+
+.status-line { margin: 16px 0 16px 12px; }
+.reqs { margin: 0 0 16px 44px; padding: 0; }
+.reqs li { margin: 5px 0; }
+
+/* ---- panels (used by cart / detail pages) ---- */
+.panel { border: 1px solid var(--band-border); margin: 0 0 16px; }
+.panel-title {
+  color: var(--orange); font-weight: bold; font-size: 10pt;
+  padding: 7px 12px; background: var(--band-bg);
+  border-bottom: 1px solid var(--band-border);
+}
+.panel-body { padding: 12px 14px; }
+
+/* Course Detail's group box heads its box with the title band and the action
+   button side by side, the band taking about two thirds of the width. */
+.panel-head { display: flex; align-items: flex-start; gap: 14px; padding: 8px 14px 0; }
+.panel-head .panel-title {
+  flex: 0 0 65%; border-bottom: none; padding: 7px 10px;
+}
+.panel-head .ps-btn { flex: 1 1 auto; min-width: 0; }
+
+/* ---- data grid ---- */
+.grid { border: 1px solid var(--band-border); margin: 0 0 18px 22px; }
+.grid-title {
+  color: var(--orange); font-weight: bold; font-size: 10pt; padding: 7px 10px;
+  background: var(--band-bg);
+}
+.grid-nav {
+  text-align: center; padding: 4px 10px; font-size: 12px;
+  color: var(--pager);
+  border-bottom: 1px solid var(--grid-line);
+}
+.grid-nav a { color: var(--link); }
+.grid-nav .pager { margin-left: 34px; }
+.grid-nav .pg { color: var(--pager); margin: 0 5px; }
+
+.grid-scroll { overflow-x: auto; }
+table.data { border-collapse: collapse; width: 100%; }
+table.data th {
+  background: var(--grid-hdr-bg); color: var(--grid-hdr-fg);
+  font-weight: bold; font-size: 8pt; text-align: left; padding: 5px 9px;
+  border-top: 1px solid var(--grid-hdr-line);
+  border-bottom: 1px solid var(--grid-hdr-line);
+  border-right: none;
+}
+table.data td {
+  border-bottom: 1px solid var(--grid-line);
+  border-right: 1px solid var(--grid-line);
+  padding: 7px 9px; vertical-align: middle;
+  font-size: 12px; color: var(--text); line-height: 120%;
+}
+table.data tbody tr:nth-child(even) td { background: var(--row-alt); }
+table.data td a { color: var(--link); text-decoration: none; }
+table.data td a:hover { color: var(--link-hover); text-decoration: underline; }
+table.data tbody tr:hover td { background: #fdf6d2; }
+.num { text-align: right; }
+.center { text-align: center; }
+
+/* ---- section status glyphs ----
+   Three distinct shapes, matching the portal: green circle = Open,
+   blue square = Closed, amber triangle = Wait List. */
+.dot { display: inline-block; width: 11px; height: 11px; margin-right: 7px; vertical-align: middle; }
+.dot.open { border-radius: 50%; background: #2f9e41; }
+.dot.closed { background: #a9c9e8; border: 1px solid #5f8fbf; }
+.dot.wait {
+  width: 0; height: 0; background: none;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 11px solid #edb31f;
+}
+
+/* ---- step wizard ---- */
+.steps { display: flex; align-items: center; margin: 18px 0 22px; }
+.steps .step { display: flex; align-items: center; gap: 9px; color: #686f77; font-size: 13px; }
+.steps .step .circle {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: #fcfcfc; color: #686f77; border: 1px solid #ced4da;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: bold;
+}
+.steps .step.active { color: #000; font-weight: bold; }
+.steps .step.active .circle { background: var(--side-active); color: #000; border: 2px solid #62ba8a; }
+.steps .step.done .circle { background: var(--green); color: #fff; border-color: var(--green); }
+.steps .connector { width: 46px; height: 1px; background: #ced4da; margin: 0 8px; }
+
+/* ---- modal ---- */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(29, 39, 51, .35);
+  display: flex; align-items: center; justify-content: center; z-index: 50;
+}
+.modal-overlay.hidden { display: none; }
+.modal-box {
+  background: #fff; border: 1px solid var(--band-border);
+  max-width: 400px; padding: 20px 22px; font-size: 13px;
+  border-radius: 3px;
+  box-shadow: 0 8px 20px 0 rgba(29, 39, 51, .25);
+}
+.modal-box .modal-actions { margin-top: 18px; text-align: right; }
+
+/* ---- weekly grid ---- */
+.weekly-grid { min-width: 780px; }
+.weekly-grid td.slot { height: 36px; }
+.weekly-grid td.busy {
+  background: #dff0d8; border: 1px solid #b7d9b0;
+  font-size: 11px; padding: 4px 6px; vertical-align: top; color: #1e5c22;
+}
+
+.go-top { margin: 26px 0 0 8px; padding-top: 10px; border-top: 1px solid var(--grid-line); font-size: 12px; }
+.go-top a { color: var(--link); text-decoration: none; }
+.go-top img { width: 11px; height: 11px; vertical-align: middle; margin-right: 5px; }
+
+/* ---- side-by-side "My Class Schedule" / "Registration Course Cart" ---- */
+.twoup { display: flex; gap: 26px; align-items: flex-start; margin: 0 0 16px 8px; }
+.twoup .panel { flex: 1 1 0; min-width: 0; margin: 0; }
+.twoup .panel-title { background: #fff; border-bottom: none; padding-bottom: 2px; }
+.twoup .panel-body { padding-top: 4px; }
+.muted { color: var(--text); margin: 0; }
+.mini-row { display: flex; gap: 18px; padding: 3px 0; font-size: 12.5px; }
+.mini-row .mini-code { flex: 0 0 96px; }
+
+/* ---- weekly meeting-days grid ---- */
+.weekly-grid th { font-size: 11px; white-space: nowrap; padding: 5px 7px; }
+.weekly-grid td { font-size: 11px; padding: 5px 7px; }
+.weekly-grid td.daycell { white-space: nowrap; font-size: 12px; }
+.weekly-grid td.slot { height: 30px; min-width: 78px; }
+
+/* ---- Section / Section Details stacked blocks (Course Schedule screen) ---- */
+.sec-block { margin: 0 0 22px 14px; }
+.sec-block .grid-title { border: 1px solid var(--band-border); border-bottom: none; }
+.sec-block table.data { border: 1px solid var(--band-border); }
+.sec-details { margin: 0 0 0 60px; }
+.sec-details .grid-title { font-size: 12.5px; }
+
+/* ---- radio picker (Related Class Sections) ---- */
+table.data td.pick { width: 34px; text-align: center; }
+table.data tr.picked td,
+table.data tr.picked:nth-child(even) td { background: var(--side-active); }
+
+/* ---- confirmation banner ---- */
+.confirm-banner {
+  display: flex; gap: 14px; align-items: flex-start;
+  margin: 0 0 22px 8px; line-height: 1.6;
+}
+.confirm-banner .chk { flex: 0 0 15px; margin-top: 3px; }
+
+/* ---- PeopleSoft 1-2-3 step chips ---- */
+.stepchips { display: flex; align-items: center; justify-content: flex-end; gap: 0; margin: -26px 0 18px; }
+.stepchips .chip {
+  width: 22px; height: 20px; border: 1px solid #868e96; background: #f9f9f9;
+  color: #686f77; font-size: 11px; display: flex; align-items: center; justify-content: center;
+}
+.stepchips .chip.active { background: #fff; color: #000; font-weight: bold; border-color: #1d2733; }
+.stepchips .dash { width: 12px; height: 1px; background: #868e96; }
+
+/* ---- weekly calendar (My Class Schedule) ---- */
+.cal { border-collapse: collapse; width: 100%; min-width: 900px; }
+.cal th, .cal td { border: 1px solid var(--band-border); vertical-align: top; }
+.cal th { background: #fff; color: #000; font-size: 12px; padding: 6px 4px; text-align: center; font-weight: normal; }
+.cal td.timecell { width: 76px; font-size: 12px; padding: 4px 8px; color: var(--text); }
+.cal td.ev { background: #cfe0b4; padding: 4px 5px; font-size: 11px; text-align: center; line-height: 1.35; }
+.cal td.empty { height: 46px; }
+.weeknav { display: flex; align-items: center; gap: 26px; margin: 0 0 16px 8px; }
+.weeknav .weeklabel {
+  flex: 1; text-align: center; color: var(--orange); font-weight: bold; font-size: 10pt;
+  border: 1px solid var(--band-border); padding: 6px 10px; background: var(--band-bg);
+}
+.optrow { display: flex; align-items: center; gap: 40px; margin: 0 0 18px 8px; }
+.optrow label { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ---- cart page left rail ---- */
+.cart-layout { display: flex; gap: 30px; align-items: flex-start; margin-left: 8px; }
+.cart-rail { flex: 0 0 190px; line-height: 2; }
+.cart-rail .rail-head { color: #000; }
+.cart-rail label { display: inline-flex; align-items: center; gap: 8px; color: var(--link); }
+.cart-main { flex: 1; min-width: 0; }
+.cart-actions { display: flex; align-items: center; gap: 16px; justify-content: center; margin: 14px 0 0; }
+.cart-actions .ps-btn { min-width: 120px; }
+
+/* ---- student homepage tiles (Fluid .nuitile) ----
+   The tile grid is pure Fluid -- the real Student Homepage has no classic
+   content area on it at all -- so it steps back out to the 11pt chrome scale
+   that `.main` dropped to 9pt for the registration pages.
+
+   The real tiles are a fixed 250x197 with 21px margins all round, not a
+   fluid grid -- they keep their size and simply wrap. auto-fill rather than
+   a hard 4-up so they reflow instead of squashing, since this copy has a
+   288px sidebar the real homepage does not. */
+.tiles {
+  font-size: 11pt;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 250px);
+  justify-content: start;
+  gap: 42px;
+  padding: 24px 24px 42px;
+}
+.tile {
+  background: #fff;
+  border: 1px solid var(--tile-border);
+  border-radius: 5px;
+  padding: 18px 10px 16px;
+  min-height: 197px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  text-align: center;
+  text-decoration: none;
+  color: #222;
+}
+a.tile:hover {
+  border-color: var(--fluid-link);
+  box-shadow: 0 8px 20px 0 rgba(29, 39, 51, .10);
+  text-decoration: none;
+}
+.tile-title { color: var(--tile-title); font-weight: bold; font-size: 1em; line-height: 1.3; }
+.tile-icon-wrap {
+  position: relative; width: 58px; height: 58px; flex: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.tile-icon-wrap img,
+.tile-icon-wrap svg { max-width: 100%; max-height: 100%; display: block; }
+.progress-donut {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: conic-gradient(#d9542f 0% 8%, #e7e0d2 8% 100%);
+  flex: 0 0 auto;
+}
+.progress-row { display: flex; align-items: center; gap: 10px; }
+.progress-note { font-size: 11px; color: var(--text); text-align: left; }
+.progress-pct { font-size: 13px; color: #333; }
+.progress-pct b { color: #d9542f; font-size: 15px; }
+
+@media (max-width: 980px) {
+  .tiles {
+    grid-template-columns: repeat(auto-fill, minmax(0, 1fr));
+    gap: 22px;
+    padding: 16px 14px 30px;
+  }
+}
+
+/* ---- homepage backdrop + footer band (#PT_WRAPPER / .lpfooter) ----
+   The real homepage floats its tiles on grey and closes the grid with a
+   translucent dark band; the registration pages behind it stay on white,
+   so this is scoped to the homepage rather than applied to .main outright. */
+body.homepage .main {
+  background: var(--page-bg);
+  max-width: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+body.homepage .tiles { flex: 1; }
+.lpfooter {
+  background: var(--footer-bg);
+  height: 42px;
+  flex: 0 0 42px;
+}
+
+/* =====================================================================
+   Below here: rules that exist only in this copy.
+   ===================================================================== */
+
+.sidebar .side-icon svg { width: 100%; height: 100%; display: block; }
+.subnav a { color: var(--link); text-decoration: none; }
+.subnav a:hover { color: var(--link-hover); text-decoration: underline; }
+.page-title.plain { border-bottom: none; }
+.ps-btn.tiny { min-width: 0; margin-left: 8px; padding: 2px 10px; font-size: 11px; }
+.req-sub.spaced { margin-top: 26px; }
+.grid.flush { margin-left: 0; }
+.grid-nav.right { text-align: right; border-bottom: none; }
+table.data.borderless { border: none; }
+table.data td.empty-row { padding: 16px; }
+.weekly-grid th.daycell {
+  white-space: nowrap; font-size: 12px;
+  background: var(--grid-hdr-bg); color: var(--orange);
+}
+.twoup.flush { margin: 0; }
+.chosen { margin-left: 22px; }
+.chosen-detail { display: inline-block; margin-left: 130px; }
+.cal th.timecell {
+  width: 76px; font-size: 12px; padding: 4px 8px;
+  color: var(--text); text-align: left; font-weight: normal;
+}
+.tile-icon-wrap svg { max-width: 100%; max-height: 100%; display: block; }
+
+/* ---- landing page ----
+   Sits under the same chrome as the walkthrough pages (topline, SISPRD strip,
+   header bar), and its sections are the classic .panel group bands the content
+   pages use, so the front door reads as part of the same portal. */
+.landing { max-width: 760px; margin: 0 auto; padding: 18px 22px 60px; line-height: 1.65; color: var(--text); }
+.landing h1 { font-size: 24px; color: #6b7d8f; font-weight: normal; margin: 0 0 6px; }
+.landing .lede { font-size: 14.5px; color: var(--text); margin: 0 0 26px; }
+.landing a { color: var(--link); }
+.landing a:hover { color: var(--link-hover); }
+.landing ol, .landing ul { padding-left: 22px; margin: 0; }
+.landing li { margin: 6px 0; }
+.landing .panel { margin-bottom: 22px; }
+.landing .panel-body p { margin: 0; }
+.landing .actions { display: flex; gap: 16px; flex-wrap: wrap; margin: 0 0 22px; }
+.landing .actions .ps-btn { padding: 10px 18px; }
+.landing footer { margin-top: 38px; padding-top: 14px; border-top: 1px solid var(--grid-line); font-size: 12px; color: var(--text); }
+
+/* ---- small utilities ---- */
+.subtle { color: var(--text); }
+.centred { text-align: center; }
+.indented { margin-left: 8px; }
+.spaced { margin-top: 18px; }
+
+/* Visible to screen readers only. Table status columns are pure colour and
+   shape otherwise, which says nothing out loud. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* ---- autoplay walkthrough overlay (demo.js) ---- */
+.demo-cursor {
+  position: fixed; left: 0; top: 0; width: 26px; height: 26px;
+  z-index: 2147483647; pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(29,39,51,.45));
+  transition: scale .12s ease, opacity .3s ease;
+}
+.demo-cursor.pressed { scale: .82; }
+.demo-cursor.done { opacity: .35; }
+.demo-ripple {
+  position: fixed; left: 0; top: 0; width: 34px; height: 34px;
+  margin: -17px 0 0 -17px; border-radius: 50%;
+  border: 2px solid var(--fluid-link); background: rgba(36,111,199,.22);
+  z-index: 2147483646; pointer-events: none;
+  opacity: 0; transform: translate(-100px,-100px) scale(.3);
+}
+.demo-caption {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+  z-index: 2147483647; max-width: 78vw;
+  background: rgba(29,39,51,.88); color: #fff;
+  font: 14px/1.4 Arial, Helvetica, sans-serif;
+  padding: 9px 20px; border-radius: 20px;
+  pointer-events: none; text-align: center;
+  opacity: 0; transition: opacity .3s ease;
+}
+.demo-caption.visible { opacity: 1; }
+
+/* ---- print ("View Report as PDF") ----
+   The disclaimer prints too. A printout of this that looks like an official
+   record is exactly the confusion worth avoiding. */
+@media print {
+  .appheader, .sidebar, .topline, .sisprd, .go-top, .btn-row, .demo-cursor,
+  .demo-ripple, .demo-caption { display: none !important; }
+
+  .main { max-width: none; padding: 0; }
+  .disclaimer {
+    background: #fff; color: #000;
+    border: 2px solid #000; margin-bottom: 12px;
+  }
+  .disclaimer a { color: #000; }
+}

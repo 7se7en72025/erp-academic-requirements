@@ -2,13 +2,113 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta http-equiv="refresh" content="0; url=student-homepage.html">
-<title>ERP Walkthrough Replica</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="An unofficial practice replica of the BITS Pilani ERP course registration flow, built for first-year students.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<title>ERP Demo</title>
+<link rel="stylesheet" href="assets/css/erp.css?v=15">
 </head>
 <body>
-<p>Redirecting to <a href="student-homepage.html?_c=6">Student Homepage</a>...</p>
+
+<aside class="disclaimer" role="note">
+  <strong>Practice replica &mdash; not the real ERP.</strong>
+  This is an unofficial walkthrough built to show first-year students what course
+  registration looks like. It is not connected to any BITS system, the courses and
+  instructors are invented, and nothing you do here is recorded.
+  <strong>Never type your real ERP password into this site.</strong>
+  The genuine portal is <a href="https://erp.bits-pilani.ac.in/" rel="external noreferrer">erp.bits-pilani.ac.in</a>.
+</aside>
+
+<!-- The portal chrome, written out flat rather than built by renderChrome().
+     This page is deliberately the one file with no scripts on it, so the CSP
+     above can keep script-src to 'self' with nothing to load. -->
+<div class="topline"></div>
+<div class="sisprd">777  -  SISDEMO</div>
+<header class="appheader">
+  <div class="page-name">ERP Registration Walkthrough</div>
+  <div class="icons">
+    <a title="Home" aria-label="Home" href="student-homepage.html"><img src="assets/img/hdr-home.svg" alt=""></a>
+    <a title="Search" aria-label="Search" href="#"><img src="assets/img/hdr-search.svg" alt=""></a>
+    <a title="Notifications" aria-label="Notifications" href="#"><img src="assets/img/hdr-alerts.svg" alt=""></a>
+    <a title="Actions" aria-label="Actions" href="#"><img src="assets/img/hdr-actions.svg" alt=""></a>
+    <a title="NavBar" aria-label="NavBar" href="#"><img src="assets/img/hdr-navbar.svg" alt=""></a>
+  </div>
+</header>
+
+<div class="landing">
+
+  <h1 class="page-title">ERP Registration Walkthrough</h1>
+  <p class="lede">
+    Registration day moves fast, and the portal is not exactly friendly the first time
+    you meet it. This is a click-through copy of the screens you will go through, with
+    made-up courses, so you can get lost in it now instead of during your slot.
+  </p>
+
+  <div class="panel">
+    <div class="panel-title">What you can do here</div>
+    <div class="panel-body">
+      <ul>
+        <li>Walk the whole flow yourself, from the homepage to a finished timetable.</li>
+        <li>Watch it play itself through, if you would rather just see the shape of it.</li>
+        <li>Get a clash wrong on purpose and see what the Validate screen actually says.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="actions">
+    <a class="ps-btn primary" href="academic-requirements.html">Start the walkthrough</a>
+    <a class="ps-btn" href="student-homepage.html?demo=1">Play it automatically</a>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">The route it takes</div>
+    <div class="panel-body">
+      <ol>
+        <li>Student Homepage &rarr; the <strong>Registration</strong> tile</li>
+        <li>My Academic Requirements &rarr; pick a course</li>
+        <li>Course Detail &rarr; Show Sections &rarr; select a section</li>
+        <li>Related Class Sections, if the course also needs a tutorial or a lab</li>
+        <li>Enrollment Preferences &rarr; the course lands in your cart</li>
+        <li>Repeat for the rest, then open the Enrollment Shopping Cart</li>
+        <li>Validate &rarr; Enroll &rarr; My Class Schedule</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Worth knowing</div>
+    <div class="panel-body">
+      <ul>
+        <li>Refreshing any page restarts the walkthrough with an empty cart. Ctrl+X does the same on purpose.</li>
+        <li>Some sections are marked Closed and cannot be picked, because the real one does that too.</li>
+        <li>
+          Every instructor name here is invented, and so is every class number, room, timing
+          and exam date. Any resemblance to actual faculty is accidental &mdash; this is not
+          the real section list.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">What this is not</div>
+    <div class="panel-body">
+      <p>
+        It is not a source of truth for anything. The class numbers, rooms, timings and exam
+        dates were invented to make the screens look plausible. For the actual sections, check
+        the ERP itself and the official timetable PDF; for the actual rules and dates, check the
+        current notices on
+        <a href="https://academic.bits-pilani.ac.in/" rel="external noreferrer">academic.bits-pilani.ac.in</a>.
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    Unofficial, student-made, and not affiliated with or endorsed by BITS Pilani.
+  </footer>
+
+</div>
+
 </body>
 </html>
