@@ -542,12 +542,18 @@ a.tile:hover {
 .progress-pct { font-size: 13px; color: #333; }
 .progress-pct b { color: #d9542f; font-size: 15px; }
 
+/* Below the width that fits three 250px tiles beside the sidebar, let them
+   share the row instead of keeping their fixed size. minmax needs a definite
+   floor for auto-fill to place more than one track, and the min() keeps that
+   floor from overflowing a phone -- a bare 190px would push the grid wider
+   than the screen once padding is counted. */
 @media (max-width: 980px) {
   .tiles {
-    grid-template-columns: repeat(auto-fill, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr));
     gap: 22px;
     padding: 16px 14px 30px;
   }
+  .tile { min-height: 0; padding: 16px 10px 14px; }
 }
 
 /* ---- homepage backdrop + footer band (#PT_WRAPPER / .lpfooter) ----
@@ -656,50 +662,120 @@ table.data td.empty-row { padding: 16px; }
    the UA [hidden] rule, so say() would fade it back in. Keep it hidden. */
 .demo-caption[hidden] { display: none !important; }
 
-/* ---- mobile gate ----
-   Everything above copies a desktop portal: a fixed sidebar, wide grids and
-   tables that assume a full window. Squeezed onto a phone it teaches the wrong
-   shape of the thing, so the walkthrough is gated there rather than reflowed.
+/* =====================================================================
+   Narrow screens
+   ---------------------------------------------------------------------
+   Everything above is the desktop portal at its real proportions, and it
+   should stay that way: this is a replica, and the point of it is that the
+   screens look like the ones students will actually meet on registration
+   day. So none of what follows restyles the portal. It only unpicks the
+   three things that assume a wide window -- the fixed 288px sidebar, the
+   side-by-side rails, and the deep left indents the classic pages use for
+   hierarchy -- and lets them stack instead.
 
-   Gated on width rather than user agent, so a browser's own "Desktop site"
-   toggle widens the viewport past this and lets the pages through -- which is
-   the escape hatch for anyone who genuinely has no laptop to hand.
+   Wide tables need no work here. Every one of them is already emitted inside
+   a .grid-scroll, which has overflow-x from the start, so .weekly-grid and
+   .cal keep their real min-widths and scroll within the column rather than
+   reflowing into something the portal never looks like.
+   ===================================================================== */
 
-   Written as pseudo-elements instead of markup: every page already loads this
-   stylesheet, so the gate covers all of them without editing ten HTML files,
-   and it needs no script -- which the Content-Security-Policy on each page
-   would refuse to run anyway. The replica warning is repeated here because the
-   landing page's .disclaimer bar is one of the things being hidden, and the
-   walkthrough pages never carry one of their own. */
-@media (max-width: 780px) {
-  body > * { display: none !important; }
+/* ---- tablet and below: unstack the shell ----
+   900px rather than 768: the sidebar alone is 288px, so the content column
+   is already down to ~480px at 780px wide, which is narrower than most of
+   the grids read well at. */
+@media (max-width: 900px) {
+  .shell { flex-direction: column; }
 
-  body {
+  /* The activity guide becomes a horizontal strip of steps above the
+     content -- same list, same order, same active state, just laid on its
+     side. It scrolls rather than wraps so the step sequence stays readable
+     as a sequence. */
+  .sidebar {
+    width: auto;
+    flex: 0 0 auto;
+    min-height: 0;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 34px 28px;
-    background: var(--page-bg);
-    font-size: 15px;
-    line-height: 1.6;
-    color: var(--text);
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--side-line);
+  }
+  .sidebar a.side-item {
+    flex: 0 0 auto;
+    padding: 11px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+    border-bottom: none;
+    border-right: 1px solid var(--side-line);
   }
 
-  body::before {
-    content: "Open this on a laptop";
-    font-size: 21px;
-    line-height: 1.3;
-    color: var(--pagetitle);
-    margin-bottom: 14px;
-  }
+  .main { padding: 12px 16px 40px; max-width: none; }
 
-  body::after {
-    /* Straight quotes, escaped. A \201c curly quote would swallow the D after
-       it -- CSS reads up to six hex digits per escape, so \201cD is one
-       character, not a quote plus a letter. */
-    content: "This is an unofficial practice replica of the BITS ERP registration flow, not the real portal. It copies a desktop layout and will not fit a phone screen. Open the same link on a laptop, or switch on \"Desktop site\" in your browser menu.";
-  }
+  /* The classic pages indent almost every band off the left edge to show
+     nesting. On a narrow column that indent is most of the column. */
+  .grid, .reqgroup, .legend, .btn-row, .go-top, .status-line,
+  .sec-block, .sec-details, .twoup, .cart-layout, .weeknav,
+  .optrow, .confirm-banner, .chosen { margin-left: 0; }
+  .reqs { margin-left: 22px; }
+  .chosen-detail { display: block; margin-left: 0; }
+
+  /* Rails that sit beside the content go under it. */
+  .twoup, .cart-layout, .panel-head { flex-direction: column; gap: 14px; }
+  .cart-rail { flex: 0 0 auto; line-height: 1.8; }
+  .panel-head { padding: 8px 14px; }
+  .panel-head .panel-title { flex: 0 0 auto; width: 100%; }
+
+  .legend { gap: 18px; flex-wrap: wrap; }
+  .btn-row { gap: 12px; }
+  .btn-row .ps-btn { flex: 1 1 auto; min-width: 150px; }
+  .cart-actions { flex-wrap: wrap; }
+
+  /* The wizard keeps its shape and scrolls; wrapping it would break the
+     left-to-right reading of the steps. */
+  .steps { overflow-x: auto; }
+  .steps .step { flex: 0 0 auto; }
+  .steps .connector { width: 24px; margin: 0 5px; }
+
+  /* Pulled up under the page title on desktop, where there is room beside
+     it. There is not here. */
+  .stepchips { justify-content: flex-start; margin: 0 0 16px; }
+
+  .tabs { overflow-x: auto; }
+  .tabs li a { white-space: nowrap; }
+
+  .modal-box { max-width: min(400px, calc(100vw - 32px)); }
+  .landing { padding: 16px 16px 44px; }
+}
+
+/* ---- phones ---- */
+@media (max-width: 560px) {
+  .appheader { padding: 0 8px; }
+  /* Between the back link and five icons there is nothing left for the page
+     name -- it truncated to a single letter. Dropping it costs nothing: every
+     page repeats it immediately below as the .page-title, and the landing page
+     repeats it as its h1. */
+  .appheader .page-name { display: none; }
+  .appheader .home-link { font-size: 14px; padding: 5px 8px; }
+  .appheader .icons { gap: 2px; margin-left: auto; }
+  .appheader .icons a { width: 26px; height: 26px; padding: 5px; }
+
+  .main { padding: 10px 12px 34px; }
+  .disclaimer { font-size: 12px; padding: 9px 12px; }
+
+  .page-title { font-size: 12.5pt; margin-top: 14px; }
+  .landing h1 { font-size: 20px; }
+  .landing .actions .ps-btn { width: 100%; }
+
+  /* One per row reads better than two half-width buttons that both wrap. */
+  .btn-row .ps-btn, .cart-actions .ps-btn { flex: 1 1 100%; min-width: 0; }
+
+  table.data td { padding: 6px 7px; }
+  table.data th { padding: 5px 7px; }
+
+  .reqs { margin-left: 16px; }
+  .generated { margin-left: 0; }
+  .idrow { gap: 12px; }
+  .idrow .goto select { width: 100%; max-width: 220px; }
+  .legend { gap: 12px; padding: 8px 10px; }
 }
 
 /* ---- print ("View Report as PDF") ----
