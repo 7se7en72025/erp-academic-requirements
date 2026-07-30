@@ -656,6 +656,52 @@ table.data td.empty-row { padding: 16px; }
    the UA [hidden] rule, so say() would fade it back in. Keep it hidden. */
 .demo-caption[hidden] { display: none !important; }
 
+/* ---- mobile gate ----
+   Everything above copies a desktop portal: a fixed sidebar, wide grids and
+   tables that assume a full window. Squeezed onto a phone it teaches the wrong
+   shape of the thing, so the walkthrough is gated there rather than reflowed.
+
+   Gated on width rather than user agent, so a browser's own "Desktop site"
+   toggle widens the viewport past this and lets the pages through -- which is
+   the escape hatch for anyone who genuinely has no laptop to hand.
+
+   Written as pseudo-elements instead of markup: every page already loads this
+   stylesheet, so the gate covers all of them without editing ten HTML files,
+   and it needs no script -- which the Content-Security-Policy on each page
+   would refuse to run anyway. The replica warning is repeated here because the
+   landing page's .disclaimer bar is one of the things being hidden, and the
+   walkthrough pages never carry one of their own. */
+@media (max-width: 780px) {
+  body > * { display: none !important; }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 34px 28px;
+    background: var(--page-bg);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  body::before {
+    content: "Open this on a laptop";
+    font-size: 21px;
+    line-height: 1.3;
+    color: var(--pagetitle);
+    margin-bottom: 14px;
+  }
+
+  body::after {
+    /* Straight quotes, escaped. A \201c curly quote would swallow the D after
+       it -- CSS reads up to six hex digits per escape, so \201cD is one
+       character, not a quote plus a letter. */
+    content: "This is an unofficial practice replica of the BITS ERP registration flow, not the real portal. It copies a desktop layout and will not fit a phone screen. Open the same link on a laptop, or switch on \"Desktop site\" in your browser menu.";
+  }
+}
+
 /* ---- print ("View Report as PDF") ----
    The disclaimer prints too. A printout of this that looks like an official
    record is exactly the confusion worth avoiding. */
